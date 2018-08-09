@@ -15,11 +15,10 @@
               <input class="form-control-file" type="file" accept="audio/*" multiple id="fileInput" @change="updateFileList">
             </div>
 
-            <presets></presets>
+            <presets @preset="updatePreset" ref="presets"></presets>
 
           </form>
           <p>Song index : {{ index }}</p>
-          <p>Preset index : {{ presetIndex }}</p>
           <ol>
             <li v-for="(file, i) in files" v-bind:class="{ bold : (i == index)}">
               {{ file.name }}
@@ -44,14 +43,6 @@
         audioContext: null,
         sourceNode: null,
         delayedAudible: null,
-        cycleInterval: null,
-        presets: {},
-        presetKeys: [],
-        presetIndex: 0,
-        presetCycle: true,
-        presetCycleLength: 15,
-        presetRandom: true,
-        canvas: document.getElementById('canvas'),
         files: [],
         index: 0,
         blendTime: 5
@@ -59,23 +50,29 @@
     },
 
     mounted() {
-      this.setupPresets();
-      this.setEventListeners();
       this.initPlayer();
+      this.$refs.presets.setupPresets();
       // this.startRec();
     },
 
-    watch: {
-      presetIndex: function(val) {
-        this.visualizer.loadPreset(this.presets[this.presetKeys[this.presetIndex]], this.blendTime);
-      }
-    },
 
     components: {
-      PresetsComponent: require("./presets.vue")
+      Presets: require("./presets.vue")
     },
 
     methods: {
+      
+      /**
+       * Updates preset
+       *
+       * @param  {Object} preset 
+       *
+       * @return {void} 
+       */
+      updatePreset(preset) {
+        this.visualizer.loadPreset(preset, this.blendTime);
+      },
+
       /**
        * Connect to audio analyser
        *
@@ -171,13 +168,11 @@
         this.audioContext.resume();
 
         var reader = new FileReader();
-        console.log(reader)
-        reader.onload = (event) => {
+        reader.onload = function(event) {
           _this.audioContext.decodeAudioData(
             event.target.result,
             (buf) => {
               _this.playBufferSource(buf);
-              console.log("second")
               setTimeout(() => {
                 if (_this.files.length > _this.index + 1) {
                               // goes to the next song
@@ -192,27 +187,7 @@
         };
         reader.readAsArrayBuffer(this.files[this.index]);
       },
-
-      /**
-       * Setup presets
-       *
-       * @return {void}
-       */
-       setupPresets() {
-        this.presets = {};
-
-        if (window.butterchurnPresets) {
-          Object.assign(this.presets, butterchurnPresets.getPresets());
-        }
-
-        if (window.butterchurnPresetsExtra) {
-          Object.assign(this.presets, butterchurnPresetsExtra.getPresets());
-        }
-
-        this.presets = _(this.presets).toPairs().sortBy(([k, v]) => k.toLowerCase()).fromPairs().value();
-        this.presetKeys = _.keys(this.presets);
-        this.presetIndex = Math.floor(Math.random() * this.presetKeys.length);
-      },
+     
 
       /**
        * Initialize the player
@@ -221,80 +196,18 @@
        */
        initPlayer() {
         var _this = this;
-        this.setupPresets();
-        this.audioContext = new AudioContext();
-
-        this.visualizer = butterchurn.createVisualizer(this.audioContext, canvas , {
+        var audioContext = new AudioContext();
+        this.audioContext = audioContext;
+        var canvas = document.getElementById('canvas')
+        var visualizer = butterchurn.createVisualizer(audioContext, canvas, {
           width: this.baseWidth,
           height: this.baseHeight,
           pixelRatio: window.devicePixelRatio || 1,
           textureRatio: 1,
         });
 
-        this.cycleInterval = setInterval(function() {
-          _this.nextPreset(2.7)
-        }, _this.presetCycleLength * 1000
-        );
-      },
-
-      /**
-       * Next preset
-       *
-       * @param  {Number} blendTime
-       *
-       * @return {void}
-       */
-       nextPreset() {
-        if (this.presetRandom) {
-          this.presetIndex = Math.floor(Math.random() * this.presetKeys.length);
-        } else {
-          this.presetIndex = (this.presetIndex + 1) % this.presetKeys.length;
-        }
-      },
-
-      /**
-       * Prev preset
-       *
-       * @param  {Number} blendTime
-       *
-       * @return {void}
-       */
-       prevPreset() {
-        var numPresets = this.presetKeys.length;
-        this.presetIndex = ((this.presetIndex - 1) + numPresets) % numPresets;
-      },
-
-      /**
-       * Restarts the interval
-       *
-       * @return {void}
-       */
-       restartCycleInterval() {
-        if (this.cycleInterval) {
-          clearInterval(this.cycleInterval);
-          this.cycleInterval = null;
-        }
-
-        if (this.presetCycle) {
-          this.cycleInterval = setInterval(() => this.nextPreset(2.7), this.presetCycleLength * 1000);
-        }
-      },
-
-      /**
-       * Set event listeners
-       */
-       setEventListeners() {
-        var _this = this;
-        $(document).keydown((e) => {
-          if (e.which === 32 || e.which === 39) {
-            _this.nextPreset();
-          } else if (e.which === 8 || e.which === 37) {
-            _this.prevPreset();
-          } else if (e.which === 72) {
-            _this.nextPreset(0);
-          }
-        });
-      }
+        this.visualizer = visualizer
+      } 
     }
   }
 

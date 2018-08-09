@@ -10,12 +10,13 @@
         <script type="text/javascript" src="https://unpkg.com/butterchurn"></script>
         <script type="text/javascript" src="https://unpkg.com/butterchurn-presets"></script>
         <script type="text/javascript" src="https://unpkg.com/butterchurn-presets/lib/butterchurnPresetsExtra.min.js"></script>
+        <script src="http://localhost:8098"></script>
         <link rel="stylesheet" href="css/app.css">
     </head>
     <body>
         <div id="app">
             <app></app>
         </div>
-        <script src="js/app.js"></script>
+        <script src="{{ mix('js/app.js') }}"></script>
     </body>
 </html>
