@@ -4,6 +4,7 @@
       <div class="row">
         <div class="col-12">
           <canvas id="canvas" :width="baseWidth" :height="baseHeight"></canvas>
+          <video playinline autoplay></video>
         </div> 
       </div>
     </div>
@@ -14,7 +15,7 @@
             <div class="form-group row">
               <input class="form-control-file" type="file" accept="audio/*" multiple id="fileInput" @change="updateFileList">
             </div>
-
+            <button @click="startRecording">record</button>
             <presets @preset="updatePreset" ref="presets"></presets>
 
           </form>
@@ -31,13 +32,14 @@
 </template>
 
 <script>
-  // app.visualizer.audioNode.context.currentTime
   // record via https://developers.google.com/web/updates/2016/10/capture-stream and https://developers.google.com/web/updates/2016/01/mediarecorder
+
+  
   export default {
     data() {
       return {
-        baseWidth: 2880,
-        baseHeight: 1620,
+        baseWidth: 1920,
+        baseHeight: 1080,
         visualizer: null,
         rendering: false,
         audioContext: null,
@@ -45,14 +47,15 @@
         delayedAudible: null,
         files: [],
         index: 0,
-        blendTime: 5
+        blendTime: 5,
+        recordedChunks: []
       }
     },
 
     mounted() {
       this.initPlayer();
       this.$refs.presets.setupPresets();
-      // this.startRec();
+      this.setupVideo();
     },
 
 
@@ -61,7 +64,67 @@
     },
 
     methods: {
-      
+
+      /**
+       * Starts the recording
+       *
+       * @return {[type]} [description]
+       */
+      startRecording(e) {
+        e.preventDefault();
+        var _this = this
+        
+        mediaRecorder.start();
+
+        mediaRecorder.ondataavailable = function handleDataAvailable(event) {
+          console.log("pushing data")
+          console.log(event.data)
+          if (event.data.size > 0) {
+            _this.recordedChunks.push(event.data); 
+            _this.download();
+          } else {
+          }
+        };
+
+        setTimeout(function() {
+          mediaRecorder.stop()
+        }, 5000)
+      },
+
+      /**
+       * Sets up the video player
+       *
+       * @return {[type]} [description]
+       */
+      setupVideo() {
+        var canvas = document.querySelector('canvas');
+        var video = document.querySelector('video');
+        var stream = canvas.captureStream(30)
+        video.srcObject = stream;
+        var options = {mimeType: 'video/webm;codecs=vp9'};
+        var mediaRecorder = new MediaRecorder(stream, options);
+        window.mediaRecorder = mediaRecorder
+      },
+
+      /**
+       * Download the file
+       *
+       * @return {[type]} [description]
+       */
+      download() {
+        var blob = new Blob(this.recordedChunks, {
+          type: 'video/webm'
+        });
+
+        console.log(blob)
+        var FileSaver = require('file-saver');
+        setTimeout(function() {
+          FileSaver.saveAs(blob, "new-test.webm");
+          
+        }, 2000)
+      },
+
+
       /**
        * Updates preset
        *
@@ -69,7 +132,7 @@
        *
        * @return {void} 
        */
-      updatePreset(preset) {
+       updatePreset(preset) {
         this.visualizer.loadPreset(preset, this.blendTime);
       },
 
@@ -187,7 +250,7 @@
         };
         reader.readAsArrayBuffer(this.files[this.index]);
       },
-     
+
 
       /**
        * Initialize the player
@@ -211,4 +274,4 @@
     }
   }
 
-</script>
+  </script>
