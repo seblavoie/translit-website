@@ -12,10 +12,10 @@
       <div class="row">
         <div class="col-6">
           <form action="form-horizontal">
-            <div class="form-check row">
+            <!-- <div class="form-check row">
               <input class="form-check-input" type="checkbox" id="presetRandom" v-model="usingMicrophone">
               <label class="form-check-label" for="random">Use microphone</label>
-            </div>
+            </div> -->
             <div class="form-group row">
             </div>
             <div class="form-group row">
@@ -35,6 +35,7 @@
           <div class="pull-right">
             <button class="btn btn-outline-primary" @click="startRecording" v-if="!recording">Start recording</button>
             <button class="btn btn-outline-primary" @click="stopRecording" v-if="recording">Stop recording</button>
+            <button class="btn btn-outline-primary" @click="requestMicAudio" v-if="!recording">Connect mic</button>
             <a href="#" @click="requestFullScreen">fullscreen</a>
           </div>
         </div>
@@ -62,14 +63,13 @@
         index: 0,
         blendTime: 5,
         recordedChunks: [],
-        usingMicrophone: false,
+        usingMicrophone: true,
         recording: false
       }
     },
 
     mounted() {
       this.initPlayer();
-      
       this.setupVideo();
     },
 
@@ -315,7 +315,49 @@
       //     navigator.mediaDevices.getUserMedia({ audio: true, video: false })
       //         .then(handleSuccess);
       // },
+      // 
+      
+      /**
+       * Request mic
+       *
+       * @param  {[type]} sourceNode   
+       * @param  {[type]} audioContext 
+       *
+       * @return {}
+       */
+      requestMicAudio() {
+        navigator.getUserMedia({ audio: true }, (stream) => {
+            var micSourceNode = this.audioContext.createMediaStreamSource(stream);
+            this.connectMicAudio(micSourceNode, this.audioContext);
+          }, (err) => {
+            console.log('Error getting audio stream from getUserMedia');
+          });
+      },
 
+      /**
+       * Connect microphone
+       *
+       * @param  {[type]} sourceNode   [description]
+       * @param  {[type]} audioContext [description]
+       *
+       * @return {[type]}              [description]
+       */
+      connectMicAudio(sourceNode, audioContext) {
+        console.log(sourceNode)
+        this.audioContext.resume();
+        var gainNode = audioContext.createGain();
+        gainNode.gain.value = 1.25;
+        sourceNode.connect(gainNode);
+        this.visualizer.connectAudio(gainNode);
+        this.startRenderer();
+      },
+
+
+      /**
+       * Initialize the player
+       *
+       * @return {[type]} [description]
+       */
       initPlayer() {
         if(this.usingMicrophone) { 
           this.initPlayerForMicrophone()
@@ -332,8 +374,8 @@
        */
        initPlayerForMicrophone() {
         var handleSuccess = (stream) => {
+          console.log("using mic")
           var audioContext = new AudioContext();
-          this.audioContext = audioContext;
 
           var source = audioContext.createMediaStreamSource(stream);
           var processor = audioContext.createScriptProcessor(1024, 1, 1);
@@ -341,10 +383,12 @@
           source.connect(processor);
           processor.connect(audioContext.destination);
 
+          this.audioContext = audioContext;
           processor.onaudioprocess = function(e) {
-              // Do something with the data, i.e Convert this to WAV
               // console.log(e.inputBuffer);
-            };            
+            };      
+          this.sendContextToViz()
+
           };
 
           navigator.mediaDevices.getUserMedia({ audio: true, video: false })
@@ -369,7 +413,7 @@
        *
        * @return {void} 
        */
-      sendContextToViz(audioContext) {
+      sendContextToViz() {
         var visualizer = butterchurn.createVisualizer(this.audioContext, document.getElementById('canvas'), {
           width: this.baseWidth,
           height: this.baseHeight,

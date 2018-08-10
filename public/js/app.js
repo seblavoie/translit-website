@@ -1685,6 +1685,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
 
 // record via https://developers.google.com/web/updates/2016/10/capture-stream and https://developers.google.com/web/updates/2016/01/mediarecorder
 
@@ -1704,13 +1705,12 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       index: 0,
       blendTime: 5,
       recordedChunks: [],
-      usingMicrophone: false,
+      usingMicrophone: true,
       recording: false
     };
   },
   mounted: function mounted() {
     this.initPlayer();
-
     this.setupVideo();
   },
 
@@ -1961,7 +1961,52 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     //     navigator.mediaDevices.getUserMedia({ audio: true, video: false })
     //         .then(handleSuccess);
     // },
+    // 
 
+    /**
+     * Request mic
+     *
+     * @param  {[type]} sourceNode   
+     * @param  {[type]} audioContext 
+     *
+     * @return {}
+     */
+    requestMicAudio: function requestMicAudio() {
+      var _this3 = this;
+
+      navigator.getUserMedia({ audio: true }, function (stream) {
+        var micSourceNode = _this3.audioContext.createMediaStreamSource(stream);
+        _this3.connectMicAudio(micSourceNode, _this3.audioContext);
+      }, function (err) {
+        console.log('Error getting audio stream from getUserMedia');
+      });
+    },
+
+
+    /**
+     * Connect microphone
+     *
+     * @param  {[type]} sourceNode   [description]
+     * @param  {[type]} audioContext [description]
+     *
+     * @return {[type]}              [description]
+     */
+    connectMicAudio: function connectMicAudio(sourceNode, audioContext) {
+      console.log(sourceNode);
+      this.audioContext.resume();
+      var gainNode = audioContext.createGain();
+      gainNode.gain.value = 1.25;
+      sourceNode.connect(gainNode);
+      this.visualizer.connectAudio(gainNode);
+      this.startRenderer();
+    },
+
+
+    /**
+     * Initialize the player
+     *
+     * @return {[type]} [description]
+     */
     initPlayer: function initPlayer() {
       if (this.usingMicrophone) {
         this.initPlayerForMicrophone();
@@ -1977,11 +2022,11 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
      * @return {void}
      */
     initPlayerForMicrophone: function initPlayerForMicrophone() {
-      var _this3 = this;
+      var _this4 = this;
 
       var handleSuccess = function handleSuccess(stream) {
+        console.log("using mic");
         var audioContext = new AudioContext();
-        _this3.audioContext = audioContext;
 
         var source = audioContext.createMediaStreamSource(stream);
         var processor = audioContext.createScriptProcessor(1024, 1, 1);
@@ -1989,10 +2034,11 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         source.connect(processor);
         processor.connect(audioContext.destination);
 
+        _this4.audioContext = audioContext;
         processor.onaudioprocess = function (e) {
-          // Do something with the data, i.e Convert this to WAV
           // console.log(e.inputBuffer);
         };
+        _this4.sendContextToViz();
       };
 
       navigator.mediaDevices.getUserMedia({ audio: true, video: false }).then(handleSuccess);
@@ -2016,7 +2062,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
      *
      * @return {void} 
      */
-    sendContextToViz: function sendContextToViz(audioContext) {
+    sendContextToViz: function sendContextToViz() {
       var visualizer = butterchurn.createVisualizer(this.audioContext, document.getElementById('canvas'), {
         width: this.baseWidth,
         height: this.baseHeight,
@@ -37079,53 +37125,6 @@ var render = function() {
             "form",
             { attrs: { action: "form-horizontal" } },
             [
-              _c("div", { staticClass: "form-check row" }, [
-                _c("input", {
-                  directives: [
-                    {
-                      name: "model",
-                      rawName: "v-model",
-                      value: _vm.usingMicrophone,
-                      expression: "usingMicrophone"
-                    }
-                  ],
-                  staticClass: "form-check-input",
-                  attrs: { type: "checkbox", id: "presetRandom" },
-                  domProps: {
-                    checked: Array.isArray(_vm.usingMicrophone)
-                      ? _vm._i(_vm.usingMicrophone, null) > -1
-                      : _vm.usingMicrophone
-                  },
-                  on: {
-                    change: function($event) {
-                      var $$a = _vm.usingMicrophone,
-                        $$el = $event.target,
-                        $$c = $$el.checked ? true : false
-                      if (Array.isArray($$a)) {
-                        var $$v = null,
-                          $$i = _vm._i($$a, $$v)
-                        if ($$el.checked) {
-                          $$i < 0 && (_vm.usingMicrophone = $$a.concat([$$v]))
-                        } else {
-                          $$i > -1 &&
-                            (_vm.usingMicrophone = $$a
-                              .slice(0, $$i)
-                              .concat($$a.slice($$i + 1)))
-                        }
-                      } else {
-                        _vm.usingMicrophone = $$c
-                      }
-                    }
-                  }
-                }),
-                _vm._v(" "),
-                _c(
-                  "label",
-                  { staticClass: "form-check-label", attrs: { for: "random" } },
-                  [_vm._v("Use microphone")]
-                )
-              ]),
-              _vm._v(" "),
               _c("div", { staticClass: "form-group row" }),
               _vm._v(" "),
               _c("div", { staticClass: "form-group row" }, [
@@ -37182,6 +37181,17 @@ var render = function() {
                     on: { click: _vm.stopRecording }
                   },
                   [_vm._v("Stop recording")]
+                )
+              : _vm._e(),
+            _vm._v(" "),
+            !_vm.recording
+              ? _c(
+                  "button",
+                  {
+                    staticClass: "btn btn-outline-primary",
+                    on: { click: _vm.requestMicAudio }
+                  },
+                  [_vm._v("Connect mic")]
                 )
               : _vm._e(),
             _vm._v(" "),
