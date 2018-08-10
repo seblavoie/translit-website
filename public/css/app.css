@@ -10483,6 +10483,10 @@ body {
   /* No floating content on sides */
 }
 
+video {
+  display: none !important;
+}
+
 #canvas,
 video {
   width: 100%;
@@ -10530,5 +10534,9 @@ form {
 .form-check-special .form-control {
   display: inline-block;
   height: 24px;
+}
+
+.pull-right {
+  float: right;
 }
 

@@ -1671,6 +1671,17 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 // record via https://developers.google.com/web/updates/2016/10/capture-stream and https://developers.google.com/web/updates/2016/01/mediarecorder
 
@@ -1688,13 +1699,16 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       files: [],
       index: 0,
       blendTime: 5,
-      recordedChunks: []
+      recordedChunks: [],
+      usingMicrophone: false,
+      recording: false
     };
   },
   mounted: function mounted() {
     this.initPlayer();
-    this.$refs.presets.setupPresets();
+
     this.setupVideo();
+    // this.test()
   },
 
 
@@ -1712,18 +1726,21 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     startRecording: function startRecording(e) {
       e.preventDefault();
       var _this = this;
-
+      this.recording = true;
       mediaRecorder.start();
 
       mediaRecorder.ondataavailable = function handleDataAvailable(event) {
-        console.log("pushing data");
-        console.log(event.data);
         if (event.data.size > 0) {
           _this.recordedChunks.push(event.data);
           _this.download();
         } else {}
       };
+    },
+    stopRecording: function stopRecording(e) {
 
+      e.preventDefault();
+
+      this.recording = false;
       setTimeout(function () {
         mediaRecorder.stop();
       }, 5000);
@@ -1740,7 +1757,10 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       var video = document.querySelector('video');
       var stream = canvas.captureStream(30);
       video.srcObject = stream;
-      var options = { mimeType: 'video/webm;codecs=vp9' };
+      var options = {
+        mimeType: 'video/webm;codecs=vp9',
+        videoBitsPerSecond: 24024000
+      };
       var mediaRecorder = new MediaRecorder(stream, options);
       window.mediaRecorder = mediaRecorder;
     },
@@ -1898,24 +1918,88 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     },
 
 
+    // test() {
+    //   var handleSuccess = function(stream) {
+    //       var context = new AudioContext();
+    //       var source = context.createMediaStreamSource(stream);
+    //       var processor = context.createScriptProcessor(1024, 1, 1);
+
+    //       source.connect(processor);
+    //       processor.connect(context.destination);
+
+    //       processor.onaudioprocess = function(e) {
+    //         // Do something with the data, i.e Convert this to WAV
+    //         console.log(e.inputBuffer);
+    //       };
+    //     };
+
+    //     navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+    //         .then(handleSuccess);
+    // },
+
+    initPlayer: function initPlayer() {
+      if (this.usingMicrophone) {
+        this.initPlayerForMicrophone();
+      } else {
+        this.initPlayerForFiles();
+      }
+    },
+
+
     /**
      * Initialize the player
      *
      * @return {void}
      */
-    initPlayer: function initPlayer() {
-      var _this = this;
+    initPlayerForMicrophone: function initPlayerForMicrophone() {
+      var _this3 = this;
+
+      var handleSuccess = function handleSuccess(stream) {
+        var audioContext = new AudioContext();
+        _this3.audioContext = audioContext;
+
+        var source = audioContext.createMediaStreamSource(stream);
+        var processor = audioContext.createScriptProcessor(1024, 1, 1);
+
+        source.connect(processor);
+        processor.connect(audioContext.destination);
+
+        processor.onaudioprocess = function (e) {
+          // Do something with the data, i.e Convert this to WAV
+          // console.log(e.inputBuffer);
+        };
+      };
+
+      navigator.mediaDevices.getUserMedia({ audio: true, video: false }).then(handleSuccess);
+    },
+
+
+    /**
+     * Initialize the player with a song
+     *
+     * @return {void}
+     */
+    initPlayerForFiles: function initPlayerForFiles() {
       var audioContext = new AudioContext();
       this.audioContext = audioContext;
-      var canvas = document.getElementById('canvas');
-      var visualizer = butterchurn.createVisualizer(audioContext, canvas, {
+      this.sendContextToViz();
+    },
+
+
+    /**
+     * Sets the vizualisation
+     *
+     * @return {void} 
+     */
+    sendContextToViz: function sendContextToViz(audioContext) {
+      var visualizer = butterchurn.createVisualizer(this.audioContext, document.getElementById('canvas'), {
         width: this.baseWidth,
         height: this.baseHeight,
         pixelRatio: window.devicePixelRatio || 1,
         textureRatio: 1
       });
-
       this.visualizer = visualizer;
+      this.$refs.presets.setupPresets();
     }
   }
 });
@@ -1988,8 +2072,8 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
 
   methods: {
     goToPreset: function goToPreset(index) {
-      var preset = this.presets[this.presetKeys[this.presetIndex]];
       this.presetIndex = index;
+      var preset = this.presets[this.presetKeys[this.presetIndex]];
       this.$emit('preset', preset);
     },
 
@@ -2021,6 +2105,10 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
       var numPresets = this.presetKeys.length;
       this.goToPreset((this.presetIndex - 1 + numPresets) % numPresets);
     },
+    requestPreset: function requestPreset() {
+      this.goToPreset(this.presetIndex);
+      this.restartCycleInterval();
+    },
 
 
     /**
@@ -2031,8 +2119,8 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
     restartCycleInterval: function restartCycleInterval() {
       var _this2 = this;
 
+      clearInterval(this.cycleInterval);
       if (this.cycleInterval) {
-        clearInterval(this.cycleInterval);
         this.cycleInterval = null;
       }
 
@@ -36897,6 +36985,55 @@ var render = function() {
             "form",
             { attrs: { action: "form-horizontal" } },
             [
+              _c("div", { staticClass: "form-check row" }, [
+                _c("input", {
+                  directives: [
+                    {
+                      name: "model",
+                      rawName: "v-model",
+                      value: _vm.usingMicrophone,
+                      expression: "usingMicrophone"
+                    }
+                  ],
+                  staticClass: "form-check-input",
+                  attrs: { type: "checkbox", id: "presetRandom" },
+                  domProps: {
+                    checked: Array.isArray(_vm.usingMicrophone)
+                      ? _vm._i(_vm.usingMicrophone, null) > -1
+                      : _vm.usingMicrophone
+                  },
+                  on: {
+                    change: function($event) {
+                      var $$a = _vm.usingMicrophone,
+                        $$el = $event.target,
+                        $$c = $$el.checked ? true : false
+                      if (Array.isArray($$a)) {
+                        var $$v = null,
+                          $$i = _vm._i($$a, $$v)
+                        if ($$el.checked) {
+                          $$i < 0 && (_vm.usingMicrophone = $$a.concat([$$v]))
+                        } else {
+                          $$i > -1 &&
+                            (_vm.usingMicrophone = $$a
+                              .slice(0, $$i)
+                              .concat($$a.slice($$i + 1)))
+                        }
+                      } else {
+                        _vm.usingMicrophone = $$c
+                      }
+                    }
+                  }
+                }),
+                _vm._v(" "),
+                _c(
+                  "label",
+                  { staticClass: "form-check-label", attrs: { for: "random" } },
+                  [_vm._v("Use microphone")]
+                )
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: "form-group row" }),
+              _vm._v(" "),
               _c("div", { staticClass: "form-group row" }, [
                 _c("input", {
                   staticClass: "form-control-file",
@@ -36908,10 +37045,6 @@ var render = function() {
                   },
                   on: { change: _vm.updateFileList }
                 })
-              ]),
-              _vm._v(" "),
-              _c("button", { on: { click: _vm.startRecording } }, [
-                _vm._v("record")
               ]),
               _vm._v(" "),
               _c("presets", {
@@ -36932,6 +37065,32 @@ var render = function() {
               ])
             })
           )
+        ]),
+        _vm._v(" "),
+        _c("div", { staticClass: "col-md-6" }, [
+          _c("div", { staticClass: "pull-right" }, [
+            !_vm.recording
+              ? _c(
+                  "button",
+                  {
+                    staticClass: "btn btn-outline-primary",
+                    on: { click: _vm.startRecording }
+                  },
+                  [_vm._v("Start recording")]
+                )
+              : _vm._e(),
+            _vm._v(" "),
+            _vm.recording
+              ? _c(
+                  "button",
+                  {
+                    staticClass: "btn btn-outline-primary",
+                    on: { click: _vm.stopRecording }
+                  },
+                  [_vm._v("Stop recording")]
+                )
+              : _vm._e()
+          ])
         ])
       ])
     ])
@@ -36979,19 +37138,22 @@ var render = function() {
             staticClass: "form-control",
             attrs: { id: "presetSelect", name: "preset" },
             on: {
-              change: function($event) {
-                var $$selectedVal = Array.prototype.filter
-                  .call($event.target.options, function(o) {
-                    return o.selected
-                  })
-                  .map(function(o) {
-                    var val = "_value" in o ? o._value : o.value
-                    return val
-                  })
-                _vm.presetIndex = $event.target.multiple
-                  ? $$selectedVal
-                  : $$selectedVal[0]
-              }
+              change: [
+                function($event) {
+                  var $$selectedVal = Array.prototype.filter
+                    .call($event.target.options, function(o) {
+                      return o.selected
+                    })
+                    .map(function(o) {
+                      var val = "_value" in o ? o._value : o.value
+                      return val
+                    })
+                  _vm.presetIndex = $event.target.multiple
+                    ? $$selectedVal
+                    : $$selectedVal[0]
+                },
+                _vm.requestPreset
+              ]
             }
           },
           _vm._l(_vm.presetKeys, function(choice, index) {
@@ -37045,7 +37207,17 @@ var render = function() {
       _vm._v(" "),
       _c(
         "label",
-        { staticClass: "form-check-label", attrs: { for: "cycle" } },
+        {
+          staticClass: "form-check-label",
+          attrs: { for: "cycle" },
+          model: {
+            value: _vm.presetCycle,
+            callback: function($$v) {
+              _vm.presetCycle = $$v
+            },
+            expression: "presetCycle"
+          }
+        },
         [_vm._v("Cycle")]
       ),
       _vm._v(" "),

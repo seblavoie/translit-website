@@ -17,6 +17,10 @@ html, body {
 	display: block;  /* No floating content on sides */
 }
 
+video {
+	display: none!important
+}
+
 #canvas, video {
 	width: 100%;
 	max-height: 80vh;
@@ -59,4 +63,8 @@ form {
 .form-check-special .form-control {
 	display: inline-block;
 	height: 24px;
+}
+
+.pull-right	{
+	float: right
 }
