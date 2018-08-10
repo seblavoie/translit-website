@@ -11,8 +11,8 @@
     </div>
 
     <div class="form-check form-check-special row">
-      <input class="form-check-input" type="checkbox" id="presetCycle" v-model="presetCycle">
-      <label class="form-check-label" for="cycle" v-model="presetCycle">Cycle</label>
+      <input class="form-check-input" type="checkbox" id="presetCycle" v-model="presetCycle" @change="restartCycleInterval">
+      <label class="form-check-label" for="cycle" v-model="presetCycle" >Cycle</label>
       <span  v-if="presetCycle"> for 
         <input class="form-control col-md-2" type="number" id="presetCycleLength"step="1" v-model="presetCycleLength" min="1" @change="restartCycleInterval"> 
         seconds

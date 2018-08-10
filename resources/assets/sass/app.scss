@@ -23,22 +23,22 @@ video {
 
 #canvas, video {
 	width: 100%;
-	max-height: 80vh;
+	// max-height: 80vh;
 }
 #canvas:-moz-full-screen {
-	width: 100%;
+	width: 100%!important;
 	height: auto;
 }
 #canvas:-webkit-full-screen {
-	width: 100%;
+	width: 100%!important;
 	height: auto;
 }
 #canvas:-ms-fullscreen {
-	width: 100%;
+	width: 100%!important;
 	height: auto;
 }
 #canvas:fullscreen {
-	width: 100%;
+	width: 100%!important;
 	height: auto;
 }
 

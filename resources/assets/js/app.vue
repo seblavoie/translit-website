@@ -35,6 +35,7 @@
           <div class="pull-right">
             <button class="btn btn-outline-primary" @click="startRecording" v-if="!recording">Start recording</button>
             <button class="btn btn-outline-primary" @click="stopRecording" v-if="recording">Stop recording</button>
+            <a href="#" @click="requestFullScreen">fullscreen</a>
           </div>
         </div>
       </div>
@@ -45,7 +46,8 @@
 <script>
   // record via https://developers.google.com/web/updates/2016/10/capture-stream and https://developers.google.com/web/updates/2016/01/mediarecorder
 
-  
+  import fscreen from 'fscreen';
+
   export default {
     data() {
       return {
@@ -69,7 +71,6 @@
       this.initPlayer();
       
       this.setupVideo();
-      // this.test()
     },
 
 
@@ -78,6 +79,29 @@
     },
 
     methods: {
+
+      requestFullScreen() {
+        var _this = this
+        var handler = function handler() {
+         if (fscreen.fullscreenElement !== null) {
+            console.log('Entered fullscreen mode');
+            setTimeout(() => {
+              _this.visualizer.renderer.width = _this.baseWidth = $( window ).width()
+              _this.visualizer.renderer.height = _this.baseHeight = $( window ).height()
+              console.log(_this.baseWidth)
+            }, 500)
+         } else {
+            this.visualizer.renderer.width = this.baseWidth = 1920
+            this.visualizer.renderer.height = this.baseHeight = 1080
+         }
+        }
+
+
+        if (fscreen.fullscreenEnabled) {
+         fscreen.addEventListener('fullscreenchange', handler, false);
+         fscreen.requestFullscreen(canvas);
+        }
+      },
 
       /**
        * Starts the recording
