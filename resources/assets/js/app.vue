@@ -31,17 +31,23 @@
             </li>
           </ol>
         </div>
-        <div class="col-md-6">
-          <div class="pull-right">
-            <button class="btn btn-outline-primary" @click="startRecording" v-if="!recording">Start recording</button>
-            <button class="btn btn-outline-primary" @click="stopRecording" v-if="recording">Stop recording</button>
-            <button class="btn btn-outline-primary" @click="requestMicAudio" v-if="!recording">Connect mic</button>
-            <a href="#" @click="requestFullScreen">fullscreen</a>
-          </div>
+        <div class="col-md-4 offset-md-2">
+          <ul class="list-group">
+            <a href="#" class="list-group-item" :class="{'active': usingMicrophone}" @click="requestMicAudio" v-if="!recording">Connect mic</a>
+            <a href="#" class="list-group-item" @click="requestFullScreen">Fullscreen</a>
+            <a href="#" class="list-group-item" @click="startRecording" v-if="!recording">Start recording</a>
+            <a href="#" class="list-group-item" @click="stopRecording" v-if="recording">Stop recording</a>
+          </ul>
+          <ul>
+            <select name="devices" v-model="selectedDevice" id="">
+              <option v-for="(device, index) in devices" :value="index">{{ device.label }}</option>
+            </select>
+          </ul>
         </div>
       </div>
     </div>
   </div>
+</div>
 </template>
 
 <script>
@@ -63,14 +69,17 @@
         index: 0,
         blendTime: 5,
         recordedChunks: [],
-        usingMicrophone: true,
-        recording: false
+        usingMicrophone: false,
+        recording: false,
+        devices: [],
+        selectedDevice: 1
       }
     },
 
     mounted() {
       this.initPlayer();
       this.setupVideo();
+      this.setupDevices();
     },
 
 
@@ -80,28 +89,73 @@
 
     methods: {
 
-      requestFullScreen() {
+      setupDevices() {
+        navigator.mediaDevices.enumerateDevices()
+        .then((deviceInfos) => {
+          // console.log(deviceInfos)
+          for (var i = 0; i !== deviceInfos.length; ++i) {
+            // console.log(i)
+            console.log(deviceInfos[i])
+            // if (deviceInfo.kind === 'audioinput') {
+              this.devices.push(deviceInfos[i])
+            // }
+          }
+        })
+        .catch(() => {
+          // console.log("error with listing devices")
+        });
+        // var gotDevices(deviceInfos) => {
+
+        //   ...
+
+        //     var deviceInfo = deviceInfos[i];
+        //     var option = document.createElement('option');
+        //     option.value = deviceInfo.deviceId;
+        //     if (deviceInfo.kind === 'audioinput') {
+        //       option.text = deviceInfo.label ||
+        //         'Microphone ' + (audioInputSelect.length + 1);
+        //       audioInputSelect.appendChild(option);
+        //     } else if (deviceInfo.kind === 'audiooutput') {
+        //       option.text = deviceInfo.label || 'Speaker ' +
+        //         (audioOutputSelect.length + 1);
+        //       audioOutputSelect.appendChild(option);
+        //     } else if (deviceInfo.kind === 'videoinput') {
+        //       option.text = deviceInfo.label || 'Camera ' +
+        //         (videoSelect.length + 1);
+        //       videoSelect.appendChild(option);
+        //     }
+
+        //   ...
+
+      },
+
+      /**
+       * Request full screen
+       *
+       * @return {[type]} [description]
+       */
+       requestFullScreen() {
         var _this = this
         var handler = function handler() {
          if (fscreen.fullscreenElement !== null) {
-            console.log('Entered fullscreen mode');
-            setTimeout(() => {
-              _this.visualizer.renderer.width = _this.baseWidth = $( window ).width()
-              _this.visualizer.renderer.height = _this.baseHeight = $( window ).height()
-              console.log(_this.baseWidth)
-            }, 500)
-         } else {
-            this.visualizer.renderer.width = this.baseWidth = 1920
-            this.visualizer.renderer.height = this.baseHeight = 1080
-         }
+          console.log('Entered fullscreen mode');
+          setTimeout(() => {
+            _this.visualizer.renderer.width = _this.baseWidth = $( window ).width()
+            _this.visualizer.renderer.height = _this.baseHeight = $( window ).height()
+            console.log(_this.baseWidth)
+          }, 500)
+        } else {
+          this.visualizer.renderer.width = this.baseWidth = 1920
+          this.visualizer.renderer.height = this.baseHeight = 1080
         }
+      }
 
 
-        if (fscreen.fullscreenEnabled) {
-         fscreen.addEventListener('fullscreenchange', handler, false);
-         fscreen.requestFullscreen(canvas);
-        }
-      },
+      if (fscreen.fullscreenEnabled) {
+       fscreen.addEventListener('fullscreenchange', handler, false);
+       fscreen.requestFullscreen(canvas);
+     }
+   },
 
       /**
        * Starts the recording
@@ -161,7 +215,6 @@
           type: 'video/webm'
         });
 
-        console.log(blob)
         var FileSaver = require('file-saver');
         setTimeout(function() {
           FileSaver.saveAs(blob, "new-test.webm");
@@ -296,26 +349,6 @@
         reader.readAsArrayBuffer(this.files[this.index]);
       },
 
-
-      // test() {
-      //   var handleSuccess = function(stream) {
-      //       var context = new AudioContext();
-      //       var source = context.createMediaStreamSource(stream);
-      //       var processor = context.createScriptProcessor(1024, 1, 1);
-
-      //       source.connect(processor);
-      //       processor.connect(context.destination);
-
-      //       processor.onaudioprocess = function(e) {
-      //         // Do something with the data, i.e Convert this to WAV
-      //         console.log(e.inputBuffer);
-      //       };
-      //     };
-
-      //     navigator.mediaDevices.getUserMedia({ audio: true, video: false })
-      //         .then(handleSuccess);
-      // },
-      // 
       
       /**
        * Request mic
@@ -325,13 +358,20 @@
        *
        * @return {}
        */
-      requestMicAudio() {
-        navigator.getUserMedia({ audio: true }, (stream) => {
-            var micSourceNode = this.audioContext.createMediaStreamSource(stream);
-            this.connectMicAudio(micSourceNode, this.audioContext);
-          }, (err) => {
-            console.log('Error getting audio stream from getUserMedia');
-          });
+       requestMicAudio() {
+        var selectedDevice = this.devices[this.selectedDevice]
+        console.log(selectedDevice)
+        
+        navigator.getUserMedia({ 
+          audio: { deviceId: {exact: selectedDevice.deviceId } }
+         }, (stream) => {
+          console.log(stream.getVideoTracks)
+          this.usingMicrophone = true;
+          var micSourceNode = this.audioContext.createMediaStreamSource(stream);
+          this.connectMicAudio(micSourceNode, this.audioContext);
+        }, (err) => {
+          console.log('Error getting audio stream from getUserMedia');
+        });
       },
 
       /**
@@ -342,7 +382,7 @@
        *
        * @return {[type]}              [description]
        */
-      connectMicAudio(sourceNode, audioContext) {
+       connectMicAudio(sourceNode, audioContext) {
         console.log(sourceNode)
         this.audioContext.resume();
         var gainNode = audioContext.createGain();
@@ -358,50 +398,7 @@
        *
        * @return {[type]} [description]
        */
-      initPlayer() {
-        if(this.usingMicrophone) { 
-          this.initPlayerForMicrophone()
-        } else {
-          this.initPlayerForFiles()
-        }
-      },
-
-
-      /**
-       * Initialize the player
-       *
-       * @return {void}
-       */
-       initPlayerForMicrophone() {
-        var handleSuccess = (stream) => {
-          console.log("using mic")
-          var audioContext = new AudioContext();
-
-          var source = audioContext.createMediaStreamSource(stream);
-          var processor = audioContext.createScriptProcessor(1024, 1, 1);
-
-          source.connect(processor);
-          processor.connect(audioContext.destination);
-
-          this.audioContext = audioContext;
-          processor.onaudioprocess = function(e) {
-              // console.log(e.inputBuffer);
-            };      
-          this.sendContextToViz()
-
-          };
-
-          navigator.mediaDevices.getUserMedia({ audio: true, video: false })
-            .then(handleSuccess);
-        },
-
-
-      /**
-       * Initialize the player with a song
-       *
-       * @return {void}
-       */
-       initPlayerForFiles() {
+       initPlayer() {
         var audioContext = new AudioContext();
         this.audioContext = audioContext;
         this.sendContextToViz()
@@ -413,7 +410,7 @@
        *
        * @return {void} 
        */
-      sendContextToViz() {
+       sendContextToViz() {
         var visualizer = butterchurn.createVisualizer(this.audioContext, document.getElementById('canvas'), {
           width: this.baseWidth,
           height: this.baseHeight,

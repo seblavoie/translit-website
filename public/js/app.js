@@ -1686,6 +1686,12 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
 
 // record via https://developers.google.com/web/updates/2016/10/capture-stream and https://developers.google.com/web/updates/2016/01/mediarecorder
 
@@ -1705,13 +1711,16 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       index: 0,
       blendTime: 5,
       recordedChunks: [],
-      usingMicrophone: true,
-      recording: false
+      usingMicrophone: false,
+      recording: false,
+      devices: [],
+      selectedDevice: 1
     };
   },
   mounted: function mounted() {
     this.initPlayer();
     this.setupVideo();
+    this.setupDevices();
   },
 
 
@@ -1720,6 +1729,51 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
   },
 
   methods: {
+    setupDevices: function setupDevices() {
+      var _this2 = this;
+
+      navigator.mediaDevices.enumerateDevices().then(function (deviceInfos) {
+        // console.log(deviceInfos)
+        for (var i = 0; i !== deviceInfos.length; ++i) {
+          // console.log(i)
+          console.log(deviceInfos[i]);
+          // if (deviceInfo.kind === 'audioinput') {
+          _this2.devices.push(deviceInfos[i]);
+          // }
+        }
+      }).catch(function () {
+        // console.log("error with listing devices")
+      });
+      // var gotDevices(deviceInfos) => {
+
+      //   ...
+
+      //     var deviceInfo = deviceInfos[i];
+      //     var option = document.createElement('option');
+      //     option.value = deviceInfo.deviceId;
+      //     if (deviceInfo.kind === 'audioinput') {
+      //       option.text = deviceInfo.label ||
+      //         'Microphone ' + (audioInputSelect.length + 1);
+      //       audioInputSelect.appendChild(option);
+      //     } else if (deviceInfo.kind === 'audiooutput') {
+      //       option.text = deviceInfo.label || 'Speaker ' +
+      //         (audioOutputSelect.length + 1);
+      //       audioOutputSelect.appendChild(option);
+      //     } else if (deviceInfo.kind === 'videoinput') {
+      //       option.text = deviceInfo.label || 'Camera ' +
+      //         (videoSelect.length + 1);
+      //       videoSelect.appendChild(option);
+      //     }
+
+      //   ...
+    },
+
+
+    /**
+     * Request full screen
+     *
+     * @return {[type]} [description]
+     */
     requestFullScreen: function requestFullScreen() {
       var _this = this;
       var handler = function handler() {
@@ -1801,7 +1855,6 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         type: 'video/webm'
       });
 
-      console.log(blob);
       var FileSaver = __webpack_require__("./node_modules/file-saver/FileSaver.js");
       setTimeout(function () {
         FileSaver.saveAs(blob, "new-test.webm");
@@ -1923,14 +1976,14 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
       var reader = new FileReader();
       reader.onload = function (event) {
-        var _this2 = this;
+        var _this3 = this;
 
         _this.audioContext.decodeAudioData(event.target.result, function (buf) {
           _this.playBufferSource(buf);
           setTimeout(function () {
             if (_this.files.length > _this.index + 1) {
               // goes to the next song
-              _this2.loadLocalFiles(_this.index + 1);
+              _this3.loadLocalFiles(_this.index + 1);
             } else {
               // finished
               _this.sourceNode.disconnect();
@@ -1943,26 +1996,6 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     },
 
 
-    // test() {
-    //   var handleSuccess = function(stream) {
-    //       var context = new AudioContext();
-    //       var source = context.createMediaStreamSource(stream);
-    //       var processor = context.createScriptProcessor(1024, 1, 1);
-
-    //       source.connect(processor);
-    //       processor.connect(context.destination);
-
-    //       processor.onaudioprocess = function(e) {
-    //         // Do something with the data, i.e Convert this to WAV
-    //         console.log(e.inputBuffer);
-    //       };
-    //     };
-
-    //     navigator.mediaDevices.getUserMedia({ audio: true, video: false })
-    //         .then(handleSuccess);
-    // },
-    // 
-
     /**
      * Request mic
      *
@@ -1972,11 +2005,18 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
      * @return {}
      */
     requestMicAudio: function requestMicAudio() {
-      var _this3 = this;
+      var _this4 = this;
 
-      navigator.getUserMedia({ audio: true }, function (stream) {
-        var micSourceNode = _this3.audioContext.createMediaStreamSource(stream);
-        _this3.connectMicAudio(micSourceNode, _this3.audioContext);
+      var selectedDevice = this.devices[this.selectedDevice];
+      console.log(selectedDevice);
+
+      navigator.getUserMedia({
+        audio: { deviceId: { exact: selectedDevice.deviceId } }
+      }, function (stream) {
+        console.log(stream.getVideoTracks);
+        _this4.usingMicrophone = true;
+        var micSourceNode = _this4.audioContext.createMediaStreamSource(stream);
+        _this4.connectMicAudio(micSourceNode, _this4.audioContext);
       }, function (err) {
         console.log('Error getting audio stream from getUserMedia');
       });
@@ -2008,49 +2048,6 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
      * @return {[type]} [description]
      */
     initPlayer: function initPlayer() {
-      if (this.usingMicrophone) {
-        this.initPlayerForMicrophone();
-      } else {
-        this.initPlayerForFiles();
-      }
-    },
-
-
-    /**
-     * Initialize the player
-     *
-     * @return {void}
-     */
-    initPlayerForMicrophone: function initPlayerForMicrophone() {
-      var _this4 = this;
-
-      var handleSuccess = function handleSuccess(stream) {
-        console.log("using mic");
-        var audioContext = new AudioContext();
-
-        var source = audioContext.createMediaStreamSource(stream);
-        var processor = audioContext.createScriptProcessor(1024, 1, 1);
-
-        source.connect(processor);
-        processor.connect(audioContext.destination);
-
-        _this4.audioContext = audioContext;
-        processor.onaudioprocess = function (e) {
-          // console.log(e.inputBuffer);
-        };
-        _this4.sendContextToViz();
-      };
-
-      navigator.mediaDevices.getUserMedia({ audio: true, video: false }).then(handleSuccess);
-    },
-
-
-    /**
-     * Initialize the player with a song
-     *
-     * @return {void}
-     */
-    initPlayerForFiles: function initPlayerForFiles() {
       var audioContext = new AudioContext();
       this.audioContext = audioContext;
       this.sendContextToViz();
@@ -37154,41 +37151,23 @@ var render = function() {
             "ol",
             _vm._l(_vm.files, function(file, i) {
               return _c("li", { class: { bold: i == _vm.index } }, [
-                _vm._v("\n            " + _vm._s(file.name) + "\n          ")
+                _vm._v(
+                  "\n              " + _vm._s(file.name) + "\n            "
+                )
               ])
             })
           )
         ]),
         _vm._v(" "),
-        _c("div", { staticClass: "col-md-6" }, [
-          _c("div", { staticClass: "pull-right" }, [
+        _c("div", { staticClass: "col-md-4 offset-md-2" }, [
+          _c("ul", { staticClass: "list-group" }, [
             !_vm.recording
               ? _c(
-                  "button",
+                  "a",
                   {
-                    staticClass: "btn btn-outline-primary",
-                    on: { click: _vm.startRecording }
-                  },
-                  [_vm._v("Start recording")]
-                )
-              : _vm._e(),
-            _vm._v(" "),
-            _vm.recording
-              ? _c(
-                  "button",
-                  {
-                    staticClass: "btn btn-outline-primary",
-                    on: { click: _vm.stopRecording }
-                  },
-                  [_vm._v("Stop recording")]
-                )
-              : _vm._e(),
-            _vm._v(" "),
-            !_vm.recording
-              ? _c(
-                  "button",
-                  {
-                    staticClass: "btn btn-outline-primary",
+                    staticClass: "list-group-item",
+                    class: { active: _vm.usingMicrophone },
+                    attrs: { href: "#" },
                     on: { click: _vm.requestMicAudio }
                   },
                   [_vm._v("Connect mic")]
@@ -37197,8 +37176,73 @@ var render = function() {
             _vm._v(" "),
             _c(
               "a",
-              { attrs: { href: "#" }, on: { click: _vm.requestFullScreen } },
-              [_vm._v("fullscreen")]
+              {
+                staticClass: "list-group-item",
+                attrs: { href: "#" },
+                on: { click: _vm.requestFullScreen }
+              },
+              [_vm._v("Fullscreen")]
+            ),
+            _vm._v(" "),
+            !_vm.recording
+              ? _c(
+                  "a",
+                  {
+                    staticClass: "list-group-item",
+                    attrs: { href: "#" },
+                    on: { click: _vm.startRecording }
+                  },
+                  [_vm._v("Start recording")]
+                )
+              : _vm._e(),
+            _vm._v(" "),
+            _vm.recording
+              ? _c(
+                  "a",
+                  {
+                    staticClass: "list-group-item",
+                    attrs: { href: "#" },
+                    on: { click: _vm.stopRecording }
+                  },
+                  [_vm._v("Stop recording")]
+                )
+              : _vm._e()
+          ]),
+          _vm._v(" "),
+          _c("ul", [
+            _c(
+              "select",
+              {
+                directives: [
+                  {
+                    name: "model",
+                    rawName: "v-model",
+                    value: _vm.selectedDevice,
+                    expression: "selectedDevice"
+                  }
+                ],
+                attrs: { name: "devices", id: "" },
+                on: {
+                  change: function($event) {
+                    var $$selectedVal = Array.prototype.filter
+                      .call($event.target.options, function(o) {
+                        return o.selected
+                      })
+                      .map(function(o) {
+                        var val = "_value" in o ? o._value : o.value
+                        return val
+                      })
+                    _vm.selectedDevice = $event.target.multiple
+                      ? $$selectedVal
+                      : $$selectedVal[0]
+                  }
+                }
+              },
+              _vm._l(_vm.devices, function(device, index) {
+                return _c("option", { domProps: { value: index } }, [
+                  _vm._v(_vm._s(device.label))
+                ])
+              })
             )
           ])
         ])
