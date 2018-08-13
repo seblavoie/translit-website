@@ -1,11 +1,11 @@
 <template>
   <div>
-    <div class="container-fluid"> 
+    <div class="container-fluid">
       <div class="row">
         <div class="col-12">
           <canvas id="canvas" :width="baseWidth" :height="baseHeight"></canvas>
           <video playinline autoplay></video>
-        </div> 
+        </div>
       </div>
     </div>
     <div class="container">
@@ -61,7 +61,7 @@
         baseWidth: 1920,
         baseHeight: 1080,
         visualizer: null,
-        rendering: false, 
+        rendering: false,
         audioContext: null,
         sourceNode: null,
         delayedAudible: null,
@@ -170,7 +170,7 @@
 
         mediaRecorder.ondataavailable = function handleDataAvailable(event) {
           if (event.data.size > 0) {
-            _this.recordedChunks.push(event.data); 
+            _this.recordedChunks.push(event.data);
             _this.download();
           } else {
           }
@@ -218,7 +218,7 @@
         var FileSaver = require('file-saver');
         setTimeout(function() {
           FileSaver.saveAs(blob, "new-test.webm");
-          
+
         }, 2000)
       },
 
@@ -226,9 +226,9 @@
       /**
        * Updates preset
        *
-       * @param  {Object} preset 
+       * @param  {Object} preset
        *
-       * @return {void} 
+       * @return {void}
        */
        updatePreset(preset) {
         this.visualizer.loadPreset(preset, this.blendTime);
@@ -315,7 +315,7 @@
         }
         this.loadLocalFiles();
       },
-      
+
       /**
        * load local file
        *
@@ -349,20 +349,20 @@
         reader.readAsArrayBuffer(this.files[this.index]);
       },
 
-      
+
       /**
        * Request mic
        *
-       * @param  {[type]} sourceNode   
-       * @param  {[type]} audioContext 
+       * @param  {[type]} sourceNode
+       * @param  {[type]} audioContext
        *
        * @return {}
        */
        requestMicAudio() {
         var selectedDevice = this.devices[this.selectedDevice]
         console.log(selectedDevice)
-        
-        navigator.getUserMedia({ 
+
+        navigator.getUserMedia({
           audio: { deviceId: {exact: selectedDevice.deviceId } }
          }, (stream) => {
           console.log(stream.getVideoTracks)
@@ -408,7 +408,7 @@
       /**
        * Sets the vizualisation
        *
-       * @return {void} 
+       * @return {void}
        */
        sendContextToViz() {
         var visualizer = butterchurn.createVisualizer(this.audioContext, document.getElementById('canvas'), {

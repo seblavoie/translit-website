@@ -5,7 +5,7 @@
       <label class="col-md-2 col-form-label" for="preset">Preset: </label>
       <div class="col-md-4">
         <select id="presetSelect" name="preset" class="form-control" v-model="presetIndex"  @change="requestPreset">
-          <option v-for="(choice, index) in presetKeys" :value="index">{{ choice }}</option> 
+          <option v-for="(choice, index) in presetKeys" :value="index">{{ choice }}</option>
         </select>
       </div>
     </div>
@@ -13,8 +13,8 @@
     <div class="form-check form-check-special row">
       <input class="form-check-input" type="checkbox" id="presetCycle" v-model="presetCycle" @change="restartCycleInterval">
       <label class="form-check-label" for="cycle" v-model="presetCycle" >Cycle</label>
-      <span  v-if="presetCycle"> for 
-        <input class="form-control col-md-2" type="number" id="presetCycleLength"step="1" v-model="presetCycleLength" min="1" @change="restartCycleInterval"> 
+      <span  v-if="presetCycle"> for
+        <input class="form-control col-md-2" type="number" id="presetCycleLength"step="1" v-model="presetCycleLength" min="1" @change="restartCycleInterval">
         seconds
       </span>
     </div>
@@ -39,9 +39,9 @@
     data() {
       return {
         cycleInterval: null,
-        presetCycle: true,
+        presetCycle: false,
         presetCycleLength: 15,
-        presetRandom: true,
+        presetRandom: false,
         presets: {},
         presetKeys: [],
         presetIndex: 0
@@ -54,7 +54,7 @@
     },
 
     props: [
-      
+
     ],
 
     methods: {

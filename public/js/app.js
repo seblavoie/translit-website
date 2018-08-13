@@ -1865,9 +1865,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     /**
      * Updates preset
      *
-     * @param  {Object} preset 
+     * @param  {Object} preset
      *
-     * @return {void} 
+     * @return {void}
      */
     updatePreset: function updatePreset(preset) {
       this.visualizer.loadPreset(preset, this.blendTime);
@@ -1999,8 +1999,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     /**
      * Request mic
      *
-     * @param  {[type]} sourceNode   
-     * @param  {[type]} audioContext 
+     * @param  {[type]} sourceNode
+     * @param  {[type]} audioContext
      *
      * @return {}
      */
@@ -2057,7 +2057,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     /**
      * Sets the vizualisation
      *
-     * @return {void} 
+     * @return {void}
      */
     sendContextToViz: function sendContextToViz() {
       var visualizer = butterchurn.createVisualizer(this.audioContext, document.getElementById('canvas'), {
@@ -2122,9 +2122,9 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
   data: function data() {
     return {
       cycleInterval: null,
-      presetCycle: true,
+      presetCycle: false,
       presetCycleLength: 15,
-      presetRandom: true,
+      presetRandom: false,
       presets: {},
       presetKeys: [],
       presetIndex: 0
@@ -37380,7 +37380,7 @@ var render = function() {
       _vm._v(" "),
       _vm.presetCycle
         ? _c("span", [
-            _vm._v(" for \n      "),
+            _vm._v(" for\n      "),
             _c("input", {
               directives: [
                 {
@@ -37408,7 +37408,7 @@ var render = function() {
                 }
               }
             }),
-            _vm._v(" \n      seconds\n    ")
+            _vm._v("\n      seconds\n    ")
           ])
         : _vm._e()
     ]),
