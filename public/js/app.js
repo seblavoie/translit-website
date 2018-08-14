@@ -1638,12 +1638,6 @@ module.exports = {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_fscreen__ = __webpack_require__("./node_modules/fscreen/lib/index.js");
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_fscreen___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_fscreen__);
-//
-//
-//
-//
 //
 //
 //
@@ -1687,8 +1681,6 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 // record via https://developers.google.com/web/updates/2016/10/capture-stream and https://developers.google.com/web/updates/2016/01/mediarecorder
 
-
-
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
     return {
@@ -1702,70 +1694,22 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       files: [],
       index: 0,
       blendTime: 5,
-      usingMicrophone: false,
-      devices: [],
-      selectedDevice: 1
+      usingMicrophone: false
     };
   },
   mounted: function mounted() {
     this.initPlayer();
-    this.setupDevices();
   },
 
 
   components: {
     Presets: __webpack_require__("./resources/assets/js/presets.vue"),
-    Recorder: __webpack_require__("./resources/assets/js/recorder.vue")
+    Recorder: __webpack_require__("./resources/assets/js/recorder.vue"),
+    Fullscreen: __webpack_require__("./resources/assets/js/fullscreen.vue"),
+    Microphone: __webpack_require__("./resources/assets/js/microphone.vue")
   },
 
   methods: {
-
-    /**
-     * Setup devices
-     *
-     * @return {void}
-     */
-    setupDevices: function setupDevices() {
-      var _this2 = this;
-
-      navigator.mediaDevices.enumerateDevices().then(function (deviceInfos) {
-        for (var i = 0; i !== deviceInfos.length; ++i) {
-          console.log(deviceInfos[i]);
-          _this2.devices.push(deviceInfos[i]);
-        }
-      }).catch(function () {
-        console.log("error with listing devices");
-      });
-    },
-
-
-    /**
-     * Request full screen
-     *
-     * @return {[type]} [description]
-     */
-    requestFullScreen: function requestFullScreen() {
-      var _this = this;
-      var handler = function handler() {
-        if (__WEBPACK_IMPORTED_MODULE_0_fscreen___default.a.fullscreenElement !== null) {
-          console.log('Entered fullscreen mode');
-          setTimeout(function () {
-            _this.visualizer.renderer.width = _this.baseWidth = $(window).width();
-            _this.visualizer.renderer.height = _this.baseHeight = $(window).height();
-            console.log(_this.baseWidth);
-          }, 500);
-        } else {
-          this.visualizer.renderer.width = this.baseWidth = 1920;
-          this.visualizer.renderer.height = this.baseHeight = 1080;
-        }
-      };
-
-      if (__WEBPACK_IMPORTED_MODULE_0_fscreen___default.a.fullscreenEnabled) {
-        __WEBPACK_IMPORTED_MODULE_0_fscreen___default.a.addEventListener('fullscreenchange', handler, false);
-        __WEBPACK_IMPORTED_MODULE_0_fscreen___default.a.requestFullscreen(canvas);
-      }
-    },
-
 
     /**
      * Updates preset
@@ -1871,14 +1815,14 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
       var reader = new FileReader();
       reader.onload = function (event) {
-        var _this3 = this;
+        var _this2 = this;
 
         _this.audioContext.decodeAudioData(event.target.result, function (buf) {
           _this.playBufferSource(buf);
           setTimeout(function () {
             if (_this.files.length > _this.index + 1) {
               // goes to the next song
-              _this3.loadLocalFiles(_this.index + 1);
+              _this2.loadLocalFiles(_this.index + 1);
             } else {
               // finished
               _this.sourceNode.disconnect();
@@ -1888,52 +1832,6 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         });
       };
       reader.readAsArrayBuffer(this.files[this.index]);
-    },
-
-
-    /**
-     * Request mic
-     *
-     * @param  {[type]} sourceNode
-     * @param  {[type]} audioContext
-     *
-     * @return {}
-     */
-    requestMicAudio: function requestMicAudio() {
-      var _this4 = this;
-
-      var selectedDevice = this.devices[this.selectedDevice];
-      console.log(selectedDevice);
-
-      navigator.getUserMedia({
-        audio: { deviceId: { exact: selectedDevice.deviceId } }
-      }, function (stream) {
-        console.log(stream.getVideoTracks);
-        _this4.usingMicrophone = true;
-        var micSourceNode = _this4.audioContext.createMediaStreamSource(stream);
-        _this4.connectMicAudio(micSourceNode, _this4.audioContext);
-      }, function (err) {
-        console.log('Error getting audio stream from getUserMedia');
-      });
-    },
-
-
-    /**
-     * Connect microphone
-     *
-     * @param  {[type]} sourceNode   [description]
-     * @param  {[type]} audioContext [description]
-     *
-     * @return {[type]}              [description]
-     */
-    connectMicAudio: function connectMicAudio(sourceNode, audioContext) {
-      console.log(sourceNode);
-      this.audioContext.resume();
-      var gainNode = audioContext.createGain();
-      gainNode.gain.value = 1.25;
-      sourceNode.connect(gainNode);
-      this.visualizer.connectAudio(gainNode);
-      this.startRenderer();
     },
 
 
@@ -1963,6 +1861,171 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       });
       this.visualizer = visualizer;
       this.$refs.presets.setupPresets();
+    }
+  }
+});
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js?{\"cacheDirectory\":true,\"presets\":[[\"env\",{\"modules\":false,\"targets\":{\"browsers\":[\"> 2%\"],\"uglify\":true}}]],\"plugins\":[\"transform-object-rest-spread\",[\"transform-runtime\",{\"polyfill\":false,\"helpers\":false}]]}!./node_modules/vue-loader/lib/selector.js?type=script&index=0!./resources/assets/js/fullscreen.vue":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_fscreen__ = __webpack_require__("./node_modules/fscreen/lib/index.js");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_fscreen___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_fscreen__);
+//
+//
+//
+//
+//
+//
+
+
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+  name: "fullscreen",
+
+  data: function data() {
+    return {};
+  },
+  mounted: function mounted() {},
+
+
+  props: [],
+
+  methods: {
+
+    /**
+     * Request full screen
+     *
+     * @return {[type]} [description]
+     */
+    requestFullScreen: function requestFullScreen() {
+      var _this = this;
+      var handler = function handler() {
+        if (__WEBPACK_IMPORTED_MODULE_0_fscreen___default.a.fullscreenElement !== null) {
+          console.log('Entered fullscreen mode');
+          //    setTimeout(() => {
+          //      _this.visualizer.renderer.width = _this.baseWidth = $( window ).width()
+          //      _this.visualizer.renderer.height = _this.baseHeight = $( window ).height()
+          //      console.log(_this.baseWidth)
+          //    }, 500)
+        } else {
+            //    this.visualizer.renderer.width = this.baseWidth = 1920
+            //    this.visualizer.renderer.height = this.baseHeight = 1080
+          }
+      };
+
+      if (__WEBPACK_IMPORTED_MODULE_0_fscreen___default.a.fullscreenEnabled) {
+        __WEBPACK_IMPORTED_MODULE_0_fscreen___default.a.addEventListener('fullscreenchange', handler, false);
+        __WEBPACK_IMPORTED_MODULE_0_fscreen___default.a.requestFullscreen(canvas);
+      }
+    }
+  }
+});
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js?{\"cacheDirectory\":true,\"presets\":[[\"env\",{\"modules\":false,\"targets\":{\"browsers\":[\"> 2%\"],\"uglify\":true}}]],\"plugins\":[\"transform-object-rest-spread\",[\"transform-runtime\",{\"polyfill\":false,\"helpers\":false}]]}!./node_modules/vue-loader/lib/selector.js?type=script&index=0!./resources/assets/js/microphone.vue":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+// record via https://developers.google.com/web/updates/2016/10/capture-stream and https://developers.google.com/web/updates/2016/01/mediarecorder
+/* harmony default export */ __webpack_exports__["default"] = ({
+  name: "recorder",
+
+  data: function data() {
+    return {
+      devices: [],
+      selectedDevice: 1,
+      usingMicrophone: false
+    };
+  },
+  mounted: function mounted() {
+    this.setupDevices();
+  },
+
+
+  props: [],
+
+  methods: {
+
+    /**
+     * Setup devices
+     *
+     * @return {void}
+     */
+    setupDevices: function setupDevices() {
+      var _this = this;
+
+      navigator.mediaDevices.enumerateDevices().then(function (deviceInfos) {
+        for (var i = 0; i !== deviceInfos.length; ++i) {
+          console.log(deviceInfos[i]);
+          _this.devices.push(deviceInfos[i]);
+        }
+      }).catch(function () {
+        console.log("error with listing devices");
+      });
+    },
+
+
+    /**
+     * Request mic
+     *
+     * @param  {[type]} sourceNode
+     * @param  {[type]} audioContext
+     *
+     * @return {}
+     */
+    requestMicAudio: function requestMicAudio() {
+      var _this2 = this;
+
+      var selectedDevice = this.devices[this.selectedDevice];
+      console.log(selectedDevice);
+
+      navigator.getUserMedia({
+        audio: { deviceId: { exact: selectedDevice.deviceId } }
+      }, function (stream) {
+        console.log(stream.getVideoTracks);
+        _this2.usingMicrophone = true;
+        var micSourceNode = _this2.audioContext.createMediaStreamSource(stream);
+        _this2.connectMicAudio(micSourceNode, _this2.audioContext);
+      }, function (err) {
+        console.log('Error getting audio stream from getUserMedia');
+      });
+    },
+
+
+    /**
+     * Connect microphone
+     *
+     * @param  {[type]} sourceNode   [description]
+     * @param  {[type]} audioContext [description]
+     *
+     * @return {[type]}              [description]
+     */
+    connectMicAudio: function connectMicAudio(sourceNode, audioContext) {
+      console.log(sourceNode);
+      this.audioContext.resume();
+      var gainNode = audioContext.createGain();
+      gainNode.gain.value = 1.25;
+      sourceNode.connect(gainNode);
+      this.visualizer.connectAudio(gainNode);
+      this.startRenderer();
     }
   }
 });
@@ -37093,6 +37156,106 @@ module.exports = function normalizeComponent (
 
 /***/ }),
 
+/***/ "./node_modules/vue-loader/lib/template-compiler/index.js?{\"id\":\"data-v-557833dc\",\"hasScoped\":false,\"buble\":{\"transforms\":{}}}!./node_modules/vue-loader/lib/selector.js?type=template&index=0!./resources/assets/js/microphone.vue":
+/***/ (function(module, exports, __webpack_require__) {
+
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c("div", [
+    _c(
+      "a",
+      {
+        staticClass: "list-group-item",
+        class: { active: _vm.usingMicrophone },
+        attrs: { href: "#" },
+        on: { click: _vm.requestMicAudio }
+      },
+      [_vm._v("Connect mic")]
+    ),
+    _vm._v(" "),
+    _c("ul", [
+      _c(
+        "select",
+        {
+          directives: [
+            {
+              name: "model",
+              rawName: "v-model",
+              value: _vm.selectedDevice,
+              expression: "selectedDevice"
+            }
+          ],
+          attrs: { name: "devices", id: "" },
+          on: {
+            change: function($event) {
+              var $$selectedVal = Array.prototype.filter
+                .call($event.target.options, function(o) {
+                  return o.selected
+                })
+                .map(function(o) {
+                  var val = "_value" in o ? o._value : o.value
+                  return val
+                })
+              _vm.selectedDevice = $event.target.multiple
+                ? $$selectedVal
+                : $$selectedVal[0]
+            }
+          }
+        },
+        _vm._l(_vm.devices, function(device, index) {
+          return _c("option", { domProps: { value: index } }, [
+            _vm._v(_vm._s(device.label))
+          ])
+        })
+      )
+    ])
+  ])
+}
+var staticRenderFns = []
+render._withStripped = true
+module.exports = { render: render, staticRenderFns: staticRenderFns }
+if (false) {
+  module.hot.accept()
+  if (module.hot.data) {
+    require("vue-hot-reload-api")      .rerender("data-v-557833dc", module.exports)
+  }
+}
+
+/***/ }),
+
+/***/ "./node_modules/vue-loader/lib/template-compiler/index.js?{\"id\":\"data-v-570b65ed\",\"hasScoped\":false,\"buble\":{\"transforms\":{}}}!./node_modules/vue-loader/lib/selector.js?type=template&index=0!./resources/assets/js/fullscreen.vue":
+/***/ (function(module, exports, __webpack_require__) {
+
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c("div", [
+    _c(
+      "a",
+      {
+        staticClass: "list-group-item",
+        attrs: { href: "#" },
+        on: { click: _vm.requestFullScreen }
+      },
+      [_vm._v("Fullscreen")]
+    )
+  ])
+}
+var staticRenderFns = []
+render._withStripped = true
+module.exports = { render: render, staticRenderFns: staticRenderFns }
+if (false) {
+  module.hot.accept()
+  if (module.hot.data) {
+    require("vue-hot-reload-api")      .rerender("data-v-570b65ed", module.exports)
+  }
+}
+
+/***/ }),
+
 /***/ "./node_modules/vue-loader/lib/template-compiler/index.js?{\"id\":\"data-v-6971d05f\",\"hasScoped\":false,\"buble\":{\"transforms\":{}}}!./node_modules/vue-loader/lib/selector.js?type=template&index=0!./resources/assets/js/app.vue":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -37162,68 +37325,14 @@ var render = function() {
             "ul",
             { staticClass: "list-group" },
             [
-              _c(
-                "a",
-                {
-                  staticClass: "list-group-item",
-                  class: { active: _vm.usingMicrophone },
-                  attrs: { href: "#" },
-                  on: { click: _vm.requestMicAudio }
-                },
-                [_vm._v("Connect mic")]
-              ),
+              _c("microphone"),
               _vm._v(" "),
-              _c(
-                "a",
-                {
-                  staticClass: "list-group-item",
-                  attrs: { href: "#" },
-                  on: { click: _vm.requestFullScreen }
-                },
-                [_vm._v("Fullscreen")]
-              ),
+              _c("fullscreen"),
               _vm._v(" "),
               _c("recorder")
             ],
             1
-          ),
-          _vm._v(" "),
-          _c("ul", [
-            _c(
-              "select",
-              {
-                directives: [
-                  {
-                    name: "model",
-                    rawName: "v-model",
-                    value: _vm.selectedDevice,
-                    expression: "selectedDevice"
-                  }
-                ],
-                attrs: { name: "devices", id: "" },
-                on: {
-                  change: function($event) {
-                    var $$selectedVal = Array.prototype.filter
-                      .call($event.target.options, function(o) {
-                        return o.selected
-                      })
-                      .map(function(o) {
-                        var val = "_value" in o ? o._value : o.value
-                        return val
-                      })
-                    _vm.selectedDevice = $event.target.multiple
-                      ? $$selectedVal
-                      : $$selectedVal[0]
-                  }
-                }
-              },
-              _vm._l(_vm.devices, function(device, index) {
-                return _c("option", { domProps: { value: index } }, [
-                  _vm._v(_vm._s(device.label))
-                ])
-              })
-            )
-          ])
+          )
         ])
       ])
     ])
@@ -48683,6 +48792,102 @@ if (token) {
 //     cluster: process.env.MIX_PUSHER_APP_CLUSTER,
 //     encrypted: true
 // });
+
+/***/ }),
+
+/***/ "./resources/assets/js/fullscreen.vue":
+/***/ (function(module, exports, __webpack_require__) {
+
+var disposed = false
+var normalizeComponent = __webpack_require__("./node_modules/vue-loader/lib/component-normalizer.js")
+/* script */
+var __vue_script__ = __webpack_require__("./node_modules/babel-loader/lib/index.js?{\"cacheDirectory\":true,\"presets\":[[\"env\",{\"modules\":false,\"targets\":{\"browsers\":[\"> 2%\"],\"uglify\":true}}]],\"plugins\":[\"transform-object-rest-spread\",[\"transform-runtime\",{\"polyfill\":false,\"helpers\":false}]]}!./node_modules/vue-loader/lib/selector.js?type=script&index=0!./resources/assets/js/fullscreen.vue")
+/* template */
+var __vue_template__ = __webpack_require__("./node_modules/vue-loader/lib/template-compiler/index.js?{\"id\":\"data-v-570b65ed\",\"hasScoped\":false,\"buble\":{\"transforms\":{}}}!./node_modules/vue-loader/lib/selector.js?type=template&index=0!./resources/assets/js/fullscreen.vue")
+/* template functional */
+var __vue_template_functional__ = false
+/* styles */
+var __vue_styles__ = null
+/* scopeId */
+var __vue_scopeId__ = null
+/* moduleIdentifier (server only) */
+var __vue_module_identifier__ = null
+var Component = normalizeComponent(
+  __vue_script__,
+  __vue_template__,
+  __vue_template_functional__,
+  __vue_styles__,
+  __vue_scopeId__,
+  __vue_module_identifier__
+)
+Component.options.__file = "resources/assets/js/fullscreen.vue"
+
+/* hot reload */
+if (false) {(function () {
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), false)
+  if (!hotAPI.compatible) return
+  module.hot.accept()
+  if (!module.hot.data) {
+    hotAPI.createRecord("data-v-570b65ed", Component.options)
+  } else {
+    hotAPI.reload("data-v-570b65ed", Component.options)
+  }
+  module.hot.dispose(function (data) {
+    disposed = true
+  })
+})()}
+
+module.exports = Component.exports
+
+
+/***/ }),
+
+/***/ "./resources/assets/js/microphone.vue":
+/***/ (function(module, exports, __webpack_require__) {
+
+var disposed = false
+var normalizeComponent = __webpack_require__("./node_modules/vue-loader/lib/component-normalizer.js")
+/* script */
+var __vue_script__ = __webpack_require__("./node_modules/babel-loader/lib/index.js?{\"cacheDirectory\":true,\"presets\":[[\"env\",{\"modules\":false,\"targets\":{\"browsers\":[\"> 2%\"],\"uglify\":true}}]],\"plugins\":[\"transform-object-rest-spread\",[\"transform-runtime\",{\"polyfill\":false,\"helpers\":false}]]}!./node_modules/vue-loader/lib/selector.js?type=script&index=0!./resources/assets/js/microphone.vue")
+/* template */
+var __vue_template__ = __webpack_require__("./node_modules/vue-loader/lib/template-compiler/index.js?{\"id\":\"data-v-557833dc\",\"hasScoped\":false,\"buble\":{\"transforms\":{}}}!./node_modules/vue-loader/lib/selector.js?type=template&index=0!./resources/assets/js/microphone.vue")
+/* template functional */
+var __vue_template_functional__ = false
+/* styles */
+var __vue_styles__ = null
+/* scopeId */
+var __vue_scopeId__ = null
+/* moduleIdentifier (server only) */
+var __vue_module_identifier__ = null
+var Component = normalizeComponent(
+  __vue_script__,
+  __vue_template__,
+  __vue_template_functional__,
+  __vue_styles__,
+  __vue_scopeId__,
+  __vue_module_identifier__
+)
+Component.options.__file = "resources/assets/js/microphone.vue"
+
+/* hot reload */
+if (false) {(function () {
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), false)
+  if (!hotAPI.compatible) return
+  module.hot.accept()
+  if (!module.hot.data) {
+    hotAPI.createRecord("data-v-557833dc", Component.options)
+  } else {
+    hotAPI.reload("data-v-557833dc", Component.options)
+  }
+  module.hot.dispose(function (data) {
+    disposed = true
+  })
+})()}
+
+module.exports = Component.exports
+
 
 /***/ }),
 

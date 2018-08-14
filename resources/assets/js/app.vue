@@ -26,15 +26,11 @@
         </div>
         <div class="col-md-4 offset-md-2">
           <ul class="list-group">
-            <a href="#" class="list-group-item" :class="{'active': usingMicrophone}" @click="requestMicAudio">Connect mic</a>
-            <a href="#" class="list-group-item" @click="requestFullScreen">Fullscreen</a>
+            <microphone></microphone>
+            <fullscreen></fullscreen>
             <recorder></recorder>
           </ul>
-          <ul>
-            <select name="devices" v-model="selectedDevice" id="">
-              <option v-for="(device, index) in devices" :value="index">{{ device.label }}</option>
-            </select>
-          </ul>
+
         </div>
       </div>
     </div>
@@ -44,8 +40,6 @@
 
 <script>
   // record via https://developers.google.com/web/updates/2016/10/capture-stream and https://developers.google.com/web/updates/2016/01/mediarecorder
-
-  import fscreen from 'fscreen';
 
   export default {
     data() {
@@ -61,69 +55,22 @@
         index: 0,
         blendTime: 5,
         usingMicrophone: false,
-        devices: [],
-        selectedDevice: 1
       }
     },
 
     mounted() {
       this.initPlayer();
-      this.setupDevices();
     },
 
 
     components: {
       Presets: require("./presets.vue"),
-      Recorder: require("./recorder.vue")
+      Recorder: require("./recorder.vue"),
+      Fullscreen: require("./fullscreen.vue"),
+      Microphone: require("./microphone.vue")
     },
 
     methods: {
-
-      /**
-       * Setup devices
-       *
-       * @return {void}
-       */
-      setupDevices() {
-        navigator.mediaDevices.enumerateDevices()
-        .then((deviceInfos) => {
-          for (var i = 0; i !== deviceInfos.length; ++i) {
-            console.log(deviceInfos[i])
-            this.devices.push(deviceInfos[i])
-          }
-        })
-        .catch(() => {
-          console.log("error with listing devices")
-        });
-      },
-
-      /**
-       * Request full screen
-       *
-       * @return {[type]} [description]
-       */
-       requestFullScreen() {
-        var _this = this
-        var handler = function handler() {
-         if (fscreen.fullscreenElement !== null) {
-          console.log('Entered fullscreen mode');
-          setTimeout(() => {
-            _this.visualizer.renderer.width = _this.baseWidth = $( window ).width()
-            _this.visualizer.renderer.height = _this.baseHeight = $( window ).height()
-            console.log(_this.baseWidth)
-          }, 500)
-        } else {
-          this.visualizer.renderer.width = this.baseWidth = 1920
-          this.visualizer.renderer.height = this.baseHeight = 1080
-        }
-        }
-
-
-        if (fscreen.fullscreenEnabled) {
-          fscreen.addEventListener('fullscreenchange', handler, false);
-          fscreen.requestFullscreen(canvas);
-        }
-      },
 
       /**
        * Updates preset
@@ -239,49 +186,6 @@
             });
         };
         reader.readAsArrayBuffer(this.files[this.index]);
-      },
-
-
-      /**
-       * Request mic
-       *
-       * @param  {[type]} sourceNode
-       * @param  {[type]} audioContext
-       *
-       * @return {}
-       */
-       requestMicAudio() {
-        var selectedDevice = this.devices[this.selectedDevice]
-        console.log(selectedDevice)
-
-        navigator.getUserMedia({
-          audio: { deviceId: {exact: selectedDevice.deviceId } }
-         }, (stream) => {
-          console.log(stream.getVideoTracks)
-          this.usingMicrophone = true;
-          var micSourceNode = this.audioContext.createMediaStreamSource(stream);
-          this.connectMicAudio(micSourceNode, this.audioContext);
-        }, (err) => {
-          console.log('Error getting audio stream from getUserMedia');
-        });
-      },
-
-      /**
-       * Connect microphone
-       *
-       * @param  {[type]} sourceNode   [description]
-       * @param  {[type]} audioContext [description]
-       *
-       * @return {[type]}              [description]
-       */
-       connectMicAudio(sourceNode, audioContext) {
-        console.log(sourceNode)
-        this.audioContext.resume();
-        var gainNode = audioContext.createGain();
-        gainNode.gain.value = 1.25;
-        sourceNode.connect(gainNode);
-        this.visualizer.connectAudio(gainNode);
-        this.startRenderer();
       },
 
 
