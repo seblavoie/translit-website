@@ -32,7 +32,6 @@
 
 <script>
   // app.visualizer.audioNode.context.currentTime
-  // record via https://developers.google.com/web/updates/2016/10/capture-stream and https://developers.google.com/web/updates/2016/01/mediarecorder
   export default {
     name: "presets",
 
@@ -155,8 +154,6 @@
         });
       }
     }
-
-
   }
 
 </script>

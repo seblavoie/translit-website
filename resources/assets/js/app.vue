@@ -4,7 +4,6 @@
       <div class="row">
         <div class="col-12">
           <canvas id="canvas" :width="baseWidth" :height="baseHeight"></canvas>
-          <video playinline autoplay></video>
         </div>
       </div>
     </div>
@@ -12,12 +11,6 @@
       <div class="row">
         <div class="col-6">
           <form action="form-horizontal">
-            <!-- <div class="form-check row">
-              <input class="form-check-input" type="checkbox" id="presetRandom" v-model="usingMicrophone">
-              <label class="form-check-label" for="random">Use microphone</label>
-            </div> -->
-            <div class="form-group row">
-            </div>
             <div class="form-group row">
               <input class="form-control-file" type="file" accept="audio/*" multiple id="fileInput" @change="updateFileList">
             </div>
@@ -33,10 +26,9 @@
         </div>
         <div class="col-md-4 offset-md-2">
           <ul class="list-group">
-            <a href="#" class="list-group-item" :class="{'active': usingMicrophone}" @click="requestMicAudio" v-if="!recording">Connect mic</a>
+            <a href="#" class="list-group-item" :class="{'active': usingMicrophone}" @click="requestMicAudio">Connect mic</a>
             <a href="#" class="list-group-item" @click="requestFullScreen">Fullscreen</a>
-            <a href="#" class="list-group-item" @click="startRecording" v-if="!recording">Start recording</a>
-            <a href="#" class="list-group-item" @click="stopRecording" v-if="recording">Stop recording</a>
+            <recorder></recorder>
           </ul>
           <ul>
             <select name="devices" v-model="selectedDevice" id="">
@@ -68,9 +60,7 @@
         files: [],
         index: 0,
         blendTime: 5,
-        recordedChunks: [],
         usingMicrophone: false,
-        recording: false,
         devices: [],
         selectedDevice: 1
       }
@@ -78,55 +68,33 @@
 
     mounted() {
       this.initPlayer();
-      this.setupVideo();
       this.setupDevices();
     },
 
 
     components: {
-      Presets: require("./presets.vue")
+      Presets: require("./presets.vue"),
+      Recorder: require("./recorder.vue")
     },
 
     methods: {
 
+      /**
+       * Setup devices
+       *
+       * @return {void}
+       */
       setupDevices() {
         navigator.mediaDevices.enumerateDevices()
         .then((deviceInfos) => {
-          // console.log(deviceInfos)
           for (var i = 0; i !== deviceInfos.length; ++i) {
-            // console.log(i)
             console.log(deviceInfos[i])
-            // if (deviceInfo.kind === 'audioinput') {
-              this.devices.push(deviceInfos[i])
-            // }
+            this.devices.push(deviceInfos[i])
           }
         })
         .catch(() => {
-          // console.log("error with listing devices")
+          console.log("error with listing devices")
         });
-        // var gotDevices(deviceInfos) => {
-
-        //   ...
-
-        //     var deviceInfo = deviceInfos[i];
-        //     var option = document.createElement('option');
-        //     option.value = deviceInfo.deviceId;
-        //     if (deviceInfo.kind === 'audioinput') {
-        //       option.text = deviceInfo.label ||
-        //         'Microphone ' + (audioInputSelect.length + 1);
-        //       audioInputSelect.appendChild(option);
-        //     } else if (deviceInfo.kind === 'audiooutput') {
-        //       option.text = deviceInfo.label || 'Speaker ' +
-        //         (audioOutputSelect.length + 1);
-        //       audioOutputSelect.appendChild(option);
-        //     } else if (deviceInfo.kind === 'videoinput') {
-        //       option.text = deviceInfo.label || 'Camera ' +
-        //         (videoSelect.length + 1);
-        //       videoSelect.appendChild(option);
-        //     }
-
-        //   ...
-
       },
 
       /**
@@ -148,80 +116,14 @@
           this.visualizer.renderer.width = this.baseWidth = 1920
           this.visualizer.renderer.height = this.baseHeight = 1080
         }
-      }
+        }
 
 
-      if (fscreen.fullscreenEnabled) {
-       fscreen.addEventListener('fullscreenchange', handler, false);
-       fscreen.requestFullscreen(canvas);
-     }
-   },
-
-      /**
-       * Starts the recording
-       *
-       * @return {[type]} [description]
-       */
-       startRecording(e) {
-        e.preventDefault();
-        var _this = this
-        this.recording = true
-        mediaRecorder.start();
-
-        mediaRecorder.ondataavailable = function handleDataAvailable(event) {
-          if (event.data.size > 0) {
-            _this.recordedChunks.push(event.data);
-            _this.download();
-          } else {
-          }
-        };
+        if (fscreen.fullscreenEnabled) {
+          fscreen.addEventListener('fullscreenchange', handler, false);
+          fscreen.requestFullscreen(canvas);
+        }
       },
-
-      stopRecording(e) {
-
-        e.preventDefault();
-
-        this.recording = false
-        setTimeout(function() {
-          mediaRecorder.stop()
-        }, 5000)
-      },
-
-      /**
-       * Sets up the video player
-       *
-       * @return {[type]} [description]
-       */
-       setupVideo() {
-        var canvas = document.querySelector('canvas');
-        var video = document.querySelector('video');
-        var stream = canvas.captureStream(30)
-        video.srcObject = stream;
-        var options = {
-          mimeType: 'video/webm;codecs=vp9',
-          videoBitsPerSecond: 24024000
-        };
-        var mediaRecorder = new MediaRecorder(stream, options);
-        window.mediaRecorder = mediaRecorder
-      },
-
-      /**
-       * Download the file
-       *
-       * @return {[type]} [description]
-       */
-       download() {
-        var blob = new Blob(this.recordedChunks, {
-          type: 'video/webm'
-        });
-
-        var FileSaver = require('file-saver');
-        setTimeout(function() {
-          FileSaver.saveAs(blob, "new-test.webm");
-
-        }, 2000)
-      },
-
 
       /**
        * Updates preset
@@ -254,16 +156,6 @@
 
         this.visualizer.connectAudio(this.delayedAudible);
       },
-
-      /**
-       * Start rec
-       *
-       * @return {void}
-       */
-      // startRec() {
-      //   var capturer = new CCapture( { format: 'png' } );
-      //   capturer.start();
-      // },
 
       /**
       * [startRenderer description]

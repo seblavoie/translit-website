@@ -1684,14 +1684,6 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
-//
-//
-//
-//
-//
-//
-//
-//
 
 // record via https://developers.google.com/web/updates/2016/10/capture-stream and https://developers.google.com/web/updates/2016/01/mediarecorder
 
@@ -1710,62 +1702,40 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       files: [],
       index: 0,
       blendTime: 5,
-      recordedChunks: [],
       usingMicrophone: false,
-      recording: false,
       devices: [],
       selectedDevice: 1
     };
   },
   mounted: function mounted() {
     this.initPlayer();
-    this.setupVideo();
     this.setupDevices();
   },
 
 
   components: {
-    Presets: __webpack_require__("./resources/assets/js/presets.vue")
+    Presets: __webpack_require__("./resources/assets/js/presets.vue"),
+    Recorder: __webpack_require__("./resources/assets/js/recorder.vue")
   },
 
   methods: {
+
+    /**
+     * Setup devices
+     *
+     * @return {void}
+     */
     setupDevices: function setupDevices() {
       var _this2 = this;
 
       navigator.mediaDevices.enumerateDevices().then(function (deviceInfos) {
-        // console.log(deviceInfos)
         for (var i = 0; i !== deviceInfos.length; ++i) {
-          // console.log(i)
           console.log(deviceInfos[i]);
-          // if (deviceInfo.kind === 'audioinput') {
           _this2.devices.push(deviceInfos[i]);
-          // }
         }
       }).catch(function () {
-        // console.log("error with listing devices")
+        console.log("error with listing devices");
       });
-      // var gotDevices(deviceInfos) => {
-
-      //   ...
-
-      //     var deviceInfo = deviceInfos[i];
-      //     var option = document.createElement('option');
-      //     option.value = deviceInfo.deviceId;
-      //     if (deviceInfo.kind === 'audioinput') {
-      //       option.text = deviceInfo.label ||
-      //         'Microphone ' + (audioInputSelect.length + 1);
-      //       audioInputSelect.appendChild(option);
-      //     } else if (deviceInfo.kind === 'audiooutput') {
-      //       option.text = deviceInfo.label || 'Speaker ' +
-      //         (audioOutputSelect.length + 1);
-      //       audioOutputSelect.appendChild(option);
-      //     } else if (deviceInfo.kind === 'videoinput') {
-      //       option.text = deviceInfo.label || 'Camera ' +
-      //         (videoSelect.length + 1);
-      //       videoSelect.appendChild(option);
-      //     }
-
-      //   ...
     },
 
 
@@ -1794,71 +1764,6 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         __WEBPACK_IMPORTED_MODULE_0_fscreen___default.a.addEventListener('fullscreenchange', handler, false);
         __WEBPACK_IMPORTED_MODULE_0_fscreen___default.a.requestFullscreen(canvas);
       }
-    },
-
-
-    /**
-     * Starts the recording
-     *
-     * @return {[type]} [description]
-     */
-    startRecording: function startRecording(e) {
-      e.preventDefault();
-      var _this = this;
-      this.recording = true;
-      mediaRecorder.start();
-
-      mediaRecorder.ondataavailable = function handleDataAvailable(event) {
-        if (event.data.size > 0) {
-          _this.recordedChunks.push(event.data);
-          _this.download();
-        } else {}
-      };
-    },
-    stopRecording: function stopRecording(e) {
-
-      e.preventDefault();
-
-      this.recording = false;
-      setTimeout(function () {
-        mediaRecorder.stop();
-      }, 5000);
-    },
-
-
-    /**
-     * Sets up the video player
-     *
-     * @return {[type]} [description]
-     */
-    setupVideo: function setupVideo() {
-      var canvas = document.querySelector('canvas');
-      var video = document.querySelector('video');
-      var stream = canvas.captureStream(30);
-      video.srcObject = stream;
-      var options = {
-        mimeType: 'video/webm;codecs=vp9',
-        videoBitsPerSecond: 24024000
-      };
-      var mediaRecorder = new MediaRecorder(stream, options);
-      window.mediaRecorder = mediaRecorder;
-    },
-
-
-    /**
-     * Download the file
-     *
-     * @return {[type]} [description]
-     */
-    download: function download() {
-      var blob = new Blob(this.recordedChunks, {
-        type: 'video/webm'
-      });
-
-      var FileSaver = __webpack_require__("./node_modules/file-saver/FileSaver.js");
-      setTimeout(function () {
-        FileSaver.saveAs(blob, "new-test.webm");
-      }, 2000);
     },
 
 
@@ -1895,16 +1800,6 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       this.visualizer.connectAudio(this.delayedAudible);
     },
 
-
-    /**
-     * Start rec
-     *
-     * @return {void}
-     */
-    // startRec() {
-    //   var capturer = new CCapture( { format: 'png' } );
-    //   capturer.start();
-    // },
 
     /**
     * [startRenderer description]
@@ -2115,7 +2010,6 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
 //
 
 // app.visualizer.audioNode.context.currentTime
-// record via https://developers.google.com/web/updates/2016/10/capture-stream and https://developers.google.com/web/updates/2016/01/mediarecorder
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "presets",
 
@@ -2248,7 +2142,115 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
       });
     }
   }
+});
 
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js?{\"cacheDirectory\":true,\"presets\":[[\"env\",{\"modules\":false,\"targets\":{\"browsers\":[\"> 2%\"],\"uglify\":true}}]],\"plugins\":[\"transform-object-rest-spread\",[\"transform-runtime\",{\"polyfill\":false,\"helpers\":false}]]}!./node_modules/vue-loader/lib/selector.js?type=script&index=0!./resources/assets/js/recorder.vue":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+//
+//
+//
+//
+//
+//
+//
+//
+
+// record via https://developers.google.com/web/updates/2016/10/capture-stream and https://developers.google.com/web/updates/2016/01/mediarecorder
+/* harmony default export */ __webpack_exports__["default"] = ({
+  name: "recorder",
+
+  data: function data() {
+    return {
+      recordedChunks: [],
+      recording: false
+    };
+  },
+  mounted: function mounted() {
+    this.setupVideo();
+  },
+
+
+  props: [],
+
+  methods: {
+
+    /**
+     * Starts the recording
+     *
+     * @return {[type]} [description]
+     */
+    startRecording: function startRecording(e) {
+      e.preventDefault();
+      var _this = this;
+      this.recording = true;
+      mediaRecorder.start();
+
+      mediaRecorder.ondataavailable = function handleDataAvailable(event) {
+        if (event.data.size > 0) {
+          _this.recordedChunks.push(event.data);
+          _this.download();
+        } else {}
+      };
+    },
+
+
+    /**
+     * Stop recording
+     *
+     * @param  {[type]} e
+     * @return {[type]}
+     */
+    stopRecording: function stopRecording(e) {
+
+      e.preventDefault();
+
+      this.recording = false;
+      setTimeout(function () {
+        mediaRecorder.stop();
+      }, 5000);
+    },
+
+
+    /**
+     * Sets up the video player
+     *
+     * @return {[type]} [description]
+     */
+    setupVideo: function setupVideo() {
+      var canvas = document.querySelector('canvas');
+      var video = document.querySelector('video');
+      var stream = canvas.captureStream(30);
+      video.srcObject = stream;
+      var options = {
+        mimeType: 'video/webm;codecs=vp9',
+        videoBitsPerSecond: 24024000
+      };
+      var mediaRecorder = new MediaRecorder(stream, options);
+      window.mediaRecorder = mediaRecorder;
+    },
+
+
+    /**
+     * Download the file
+     *
+     * @return {[type]} [description]
+     */
+    download: function download() {
+      var blob = new Blob(this.recordedChunks, {
+        type: 'video/webm'
+      });
+
+      var FileSaver = __webpack_require__("./node_modules/file-saver/FileSaver.js");
+      setTimeout(function () {
+        FileSaver.saveAs(blob, "new-test.webm");
+      }, 2000);
+    }
+  }
 });
 
 /***/ }),
@@ -37108,9 +37110,7 @@ var render = function() {
               width: _vm.baseWidth,
               height: _vm.baseHeight
             }
-          }),
-          _vm._v(" "),
-          _c("video", { attrs: { playinline: "", autoplay: "" } })
+          })
         ])
       ])
     ]),
@@ -37122,8 +37122,6 @@ var render = function() {
             "form",
             { attrs: { action: "form-horizontal" } },
             [
-              _c("div", { staticClass: "form-group row" }),
-              _vm._v(" "),
               _c("div", { staticClass: "form-group row" }, [
                 _c("input", {
                   staticClass: "form-control-file",
@@ -37160,54 +37158,35 @@ var render = function() {
         ]),
         _vm._v(" "),
         _c("div", { staticClass: "col-md-4 offset-md-2" }, [
-          _c("ul", { staticClass: "list-group" }, [
-            !_vm.recording
-              ? _c(
-                  "a",
-                  {
-                    staticClass: "list-group-item",
-                    class: { active: _vm.usingMicrophone },
-                    attrs: { href: "#" },
-                    on: { click: _vm.requestMicAudio }
-                  },
-                  [_vm._v("Connect mic")]
-                )
-              : _vm._e(),
-            _vm._v(" "),
-            _c(
-              "a",
-              {
-                staticClass: "list-group-item",
-                attrs: { href: "#" },
-                on: { click: _vm.requestFullScreen }
-              },
-              [_vm._v("Fullscreen")]
-            ),
-            _vm._v(" "),
-            !_vm.recording
-              ? _c(
-                  "a",
-                  {
-                    staticClass: "list-group-item",
-                    attrs: { href: "#" },
-                    on: { click: _vm.startRecording }
-                  },
-                  [_vm._v("Start recording")]
-                )
-              : _vm._e(),
-            _vm._v(" "),
-            _vm.recording
-              ? _c(
-                  "a",
-                  {
-                    staticClass: "list-group-item",
-                    attrs: { href: "#" },
-                    on: { click: _vm.stopRecording }
-                  },
-                  [_vm._v("Stop recording")]
-                )
-              : _vm._e()
-          ]),
+          _c(
+            "ul",
+            { staticClass: "list-group" },
+            [
+              _c(
+                "a",
+                {
+                  staticClass: "list-group-item",
+                  class: { active: _vm.usingMicrophone },
+                  attrs: { href: "#" },
+                  on: { click: _vm.requestMicAudio }
+                },
+                [_vm._v("Connect mic")]
+              ),
+              _vm._v(" "),
+              _c(
+                "a",
+                {
+                  staticClass: "list-group-item",
+                  attrs: { href: "#" },
+                  on: { click: _vm.requestFullScreen }
+                },
+                [_vm._v("Fullscreen")]
+              ),
+              _vm._v(" "),
+              _c("recorder")
+            ],
+            1
+          ),
           _vm._v(" "),
           _c("ul", [
             _c(
@@ -37470,6 +37449,53 @@ if (false) {
   module.hot.accept()
   if (module.hot.data) {
     require("vue-hot-reload-api")      .rerender("data-v-7fdb6b32", module.exports)
+  }
+}
+
+/***/ }),
+
+/***/ "./node_modules/vue-loader/lib/template-compiler/index.js?{\"id\":\"data-v-b50e5020\",\"hasScoped\":false,\"buble\":{\"transforms\":{}}}!./node_modules/vue-loader/lib/selector.js?type=template&index=0!./resources/assets/js/recorder.vue":
+/***/ (function(module, exports, __webpack_require__) {
+
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c("div", [
+    !_vm.recording
+      ? _c(
+          "a",
+          {
+            staticClass: "list-group-item",
+            attrs: { href: "#" },
+            on: { click: _vm.startRecording }
+          },
+          [_vm._v("Start recording")]
+        )
+      : _vm._e(),
+    _vm._v(" "),
+    _vm.recording
+      ? _c(
+          "a",
+          {
+            staticClass: "list-group-item",
+            attrs: { href: "#" },
+            on: { click: _vm.stopRecording }
+          },
+          [_vm._v("Stop recording")]
+        )
+      : _vm._e(),
+    _vm._v(" "),
+    _c("video", { attrs: { playinline: "", autoplay: "" } })
+  ])
+}
+var staticRenderFns = []
+render._withStripped = true
+module.exports = { render: render, staticRenderFns: staticRenderFns }
+if (false) {
+  module.hot.accept()
+  if (module.hot.data) {
+    require("vue-hot-reload-api")      .rerender("data-v-b50e5020", module.exports)
   }
 }
 
@@ -48697,6 +48723,54 @@ if (false) {(function () {
     hotAPI.createRecord("data-v-7fdb6b32", Component.options)
   } else {
     hotAPI.reload("data-v-7fdb6b32", Component.options)
+  }
+  module.hot.dispose(function (data) {
+    disposed = true
+  })
+})()}
+
+module.exports = Component.exports
+
+
+/***/ }),
+
+/***/ "./resources/assets/js/recorder.vue":
+/***/ (function(module, exports, __webpack_require__) {
+
+var disposed = false
+var normalizeComponent = __webpack_require__("./node_modules/vue-loader/lib/component-normalizer.js")
+/* script */
+var __vue_script__ = __webpack_require__("./node_modules/babel-loader/lib/index.js?{\"cacheDirectory\":true,\"presets\":[[\"env\",{\"modules\":false,\"targets\":{\"browsers\":[\"> 2%\"],\"uglify\":true}}]],\"plugins\":[\"transform-object-rest-spread\",[\"transform-runtime\",{\"polyfill\":false,\"helpers\":false}]]}!./node_modules/vue-loader/lib/selector.js?type=script&index=0!./resources/assets/js/recorder.vue")
+/* template */
+var __vue_template__ = __webpack_require__("./node_modules/vue-loader/lib/template-compiler/index.js?{\"id\":\"data-v-b50e5020\",\"hasScoped\":false,\"buble\":{\"transforms\":{}}}!./node_modules/vue-loader/lib/selector.js?type=template&index=0!./resources/assets/js/recorder.vue")
+/* template functional */
+var __vue_template_functional__ = false
+/* styles */
+var __vue_styles__ = null
+/* scopeId */
+var __vue_scopeId__ = null
+/* moduleIdentifier (server only) */
+var __vue_module_identifier__ = null
+var Component = normalizeComponent(
+  __vue_script__,
+  __vue_template__,
+  __vue_template_functional__,
+  __vue_styles__,
+  __vue_scopeId__,
+  __vue_module_identifier__
+)
+Component.options.__file = "resources/assets/js/recorder.vue"
+
+/* hot reload */
+if (false) {(function () {
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), false)
+  if (!hotAPI.compatible) return
+  module.hot.accept()
+  if (!module.hot.data) {
+    hotAPI.createRecord("data-v-b50e5020", Component.options)
+  } else {
+    hotAPI.reload("data-v-b50e5020", Component.options)
   }
   module.hot.dispose(function (data) {
     disposed = true
