@@ -10,9 +10,9 @@
         <script type="text/javascript" src="https://unpkg.com/butterchurn"></script>
         <script type="text/javascript" src="https://unpkg.com/butterchurn-presets"></script>
         <script type="text/javascript" src="https://unpkg.com/butterchurn-presets/lib/butterchurnPresetsExtra.min.js"></script>
-        @env('local')
+        @isset($prod)
         <script src="http://localhost:8098"></script>
-        @endenv
+        @endisset
         <link rel="stylesheet" href="css/app.css">
     </head>
     <body>

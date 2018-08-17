@@ -29,7 +29,7 @@ class HomeController extends Controller
 
     public function build()
     {
-        $html = view('home')->render();
+        $html = view('home')->with(['prod' => true])->render();
 
         Storage::disk('builds')->put('index.html', $html);
 
