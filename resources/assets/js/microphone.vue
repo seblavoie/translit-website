@@ -18,7 +18,8 @@
       return {
         devices: [],
         selectedDevice: 1,
-        usingMicrophone: false
+        usingMicrophone: false,
+        aduioContext: null
       }
     },
 
@@ -61,14 +62,19 @@
        requestMicAudio() {
         var selectedDevice = this.devices[this.selectedDevice]
         console.log(selectedDevice)
-
+        var preciseDeviceConstraint = { deviceId: {exact: selectedDevice.deviceId } }
+        var constraints = (selectedDevice.label == "" ? {audio: true} : preciseDeviceConstraint)
+        console.log(constraints)
+        console.log(this.$parent.audioContext)
         navigator.getUserMedia({
-          audio: { deviceId: {exact: selectedDevice.deviceId } }
+          audio: constraints
          }, (stream) => {
-          console.log(stream.getVideoTracks)
           this.usingMicrophone = true;
-          var micSourceNode = this.audioContext.createMediaStreamSource(stream);
-          this.connectMicAudio(micSourceNode, this.audioContext);
+          var micSourceNode = this.$parent.audioContext.createMediaStreamSource(stream);
+          console.log("audiocontext : ")
+          console.log(this.$parent.audioContext)
+          this.connectMicAudio(micSourceNode, this.$parent.audioContext);
+          console.log(stream)
         }, (err) => {
           console.log('Error getting audio stream from getUserMedia');
         });
@@ -84,12 +90,16 @@
        */
        connectMicAudio(sourceNode, audioContext) {
         console.log(sourceNode)
-        this.audioContext.resume();
-        var gainNode = audioContext.createGain();
+        console.log("connect mic audio")
+
+        console.log("audiocontext : ")
+        console.log(this.$parent.audioContext)
+        this.$parent.audioContext.resume();
+        var gainNode = this.$parent.audioContext.createGain();
         gainNode.gain.value = 1.25;
         sourceNode.connect(gainNode);
-        this.visualizer.connectAudio(gainNode);
-        this.startRenderer();
+        this.$parent.visualizer.connectAudio(gainNode);
+        this.$parent.startRenderer();
       },
     }
   }

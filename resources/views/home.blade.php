@@ -12,7 +12,7 @@
         <script type="text/javascript" src="https://unpkg.com/butterchurn-presets/lib/butterchurnPresetsExtra.min.js"></script>
         @empty($prod)
         <script src="http://localhost:8098"></script>
-        @endisset
+        @endempty
         <link rel="stylesheet" href="css/app.css">
     </head>
     <body>
