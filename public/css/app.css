@@ -10539,3 +10539,11 @@ form {
   float: right;
 }
 
+.controls {
+  background: red;
+  position: absolute;
+  bottom: 0px;
+  width: 100%;
+  border-radius: 0;
+}
+

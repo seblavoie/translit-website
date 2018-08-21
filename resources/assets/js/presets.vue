@@ -48,7 +48,6 @@
     },
 
     mounted() {
-      // this.setupPresets();
       this.setEventListeners();
     },
 
@@ -132,10 +131,12 @@
         this.presetKeys = _.keys(this.presets);
         this.goToPreset(Math.floor(Math.random() * this.presetKeys.length));
 
-        this.cycleInterval = setInterval(function() {
-            _this.nextPreset(2.7)
-          }, _this.presetCycleLength * 1000
-        );
+        if(this.presetCycle) {
+          this.cycleInterval = setInterval(function() {
+              _this.nextPreset(2.7)
+            }, _this.presetCycleLength * 1000
+          );
+        }
       },
 
       /**

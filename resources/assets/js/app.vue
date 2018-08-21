@@ -4,6 +4,9 @@
       <div class="row">
         <div class="col-12">
           <canvas id="canvas" :width="baseWidth" :height="baseHeight"></canvas>
+          <div class="controls">
+            <fullscreen></fullscreen>
+          </div>
         </div>
       </div>
     </div>
@@ -26,7 +29,6 @@
         </div>
         <div class="col-md-4 offset-md-2">
           <ul class="list-group">
-            <fullscreen></fullscreen>
             <microphone></microphone>
             <!-- <recorder></recorder> -->
           </ul>
@@ -195,9 +197,31 @@
        * @return {[type]} [description]
        */
        initPlayer() {
-        var audioContext = new AudioContext();
+        var audioContext = this.getAudioContext();
         this.audioContext = audioContext;
         this.sendContextToViz()
+      },
+
+
+      /**
+       * Gets audio context or throws an error
+       *
+       * @return {AudioContext}
+       */
+      getAudioContext() {
+        var AudioContext = window.AudioContext // Default
+            || window.webkitAudioContext // Safari and old versions of Chrome
+            || false; 
+
+        if (AudioContext) {
+            // Do whatever you want using the Web Audio API
+            return new AudioContext;
+            // ...
+        } else {
+            // Web Audio API is not supported
+            // Alert the user
+            alert("Sorry, but the Web Audio API is not supported by your browser. Please, consider upgrading to the latest version or downloading Google Chrome or Mozilla Firefox");
+        }
       },
 
 

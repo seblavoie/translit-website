@@ -1678,6 +1678,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
 
 // record via https://developers.google.com/web/updates/2016/10/capture-stream and https://developers.google.com/web/updates/2016/01/mediarecorder
 
@@ -1841,9 +1843,31 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
      * @return {[type]} [description]
      */
     initPlayer: function initPlayer() {
-      var audioContext = new AudioContext();
+      var audioContext = this.getAudioContext();
       this.audioContext = audioContext;
       this.sendContextToViz();
+    },
+
+
+    /**
+     * Gets audio context or throws an error
+     *
+     * @return {AudioContext}
+     */
+    getAudioContext: function getAudioContext() {
+      var AudioContext = window.AudioContext // Default
+      || window.webkitAudioContext // Safari and old versions of Chrome
+      || false;
+
+      if (AudioContext) {
+        // Do whatever you want using the Web Audio API
+        return new AudioContext();
+        // ...
+      } else {
+        // Web Audio API is not supported
+        // Alert the user
+        alert("Sorry, but the Web Audio API is not supported by your browser. Please, consider upgrading to the latest version or downloading Google Chrome or Mozilla Firefox");
+      }
     },
 
 
@@ -2098,7 +2122,6 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
     };
   },
   mounted: function mounted() {
-    // this.setupPresets();
     this.setEventListeners();
   },
 
@@ -2193,9 +2216,11 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
       this.presetKeys = _.keys(this.presets);
       this.goToPreset(Math.floor(Math.random() * this.presetKeys.length));
 
-      this.cycleInterval = setInterval(function () {
-        _this.nextPreset(2.7);
-      }, _this.presetCycleLength * 1000);
+      if (this.presetCycle) {
+        this.cycleInterval = setInterval(function () {
+          _this.nextPreset(2.7);
+        }, _this.presetCycleLength * 1000);
+      }
     },
 
 
@@ -37283,7 +37308,9 @@ var render = function() {
               width: _vm.baseWidth,
               height: _vm.baseHeight
             }
-          })
+          }),
+          _vm._v(" "),
+          _c("div", { staticClass: "controls" }, [_c("fullscreen")], 1)
         ])
       ])
     ]),
@@ -37331,12 +37358,7 @@ var render = function() {
         ]),
         _vm._v(" "),
         _c("div", { staticClass: "col-md-4 offset-md-2" }, [
-          _c(
-            "ul",
-            { staticClass: "list-group" },
-            [_c("fullscreen"), _vm._v(" "), _c("microphone")],
-            1
-          )
+          _c("ul", { staticClass: "list-group" }, [_c("microphone")], 1)
         ])
       ])
     ])
