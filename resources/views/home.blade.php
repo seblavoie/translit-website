@@ -10,6 +10,9 @@
         <script type="text/javascript" src="https://unpkg.com/butterchurn"></script>
         <script type="text/javascript" src="https://unpkg.com/butterchurn-presets"></script>
         <script type="text/javascript" src="https://unpkg.com/butterchurn-presets/lib/butterchurnPresetsExtra.min.js"></script>
+        <script defer src="https://use.fontawesome.com/releases/v5.2.0/js/all.js" integrity="sha384-4oV5EgaV02iISL2ban6c/RmotsABqE4yZxZLcYMAdG7FAPsyHYAPpywE9PJo+Khy" crossorigin="anonymous"></script>
+
+
         @empty($prod)
         <script src="http://localhost:8098"></script>
         @endempty

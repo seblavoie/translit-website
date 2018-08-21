@@ -1,14 +1,16 @@
 <template>
   <div>
-    <div class="container-fluid">
-      <div class="row">
-        <div class="col-12">
-          <canvas id="canvas" :width="baseWidth" :height="baseHeight"></canvas>
-
-          <div class="controls">
+    <div class="wrapper">
+      <canvas id="canvas" :width="baseWidth" :height="baseHeight"></canvas>
+      <div class="controls">
+        <ul class="pull-right nav nav-pills">
+          <li class="nav-item">
+            <microphone></microphone>
+          </li>
+          <li clas="nav-item">
             <fullscreen></fullscreen>
-          </div>
-        </div>
+          </li>
+        </ul>
       </div>
     </div>
     <div class="container">
@@ -29,10 +31,8 @@
         </div>
         <div class="col-md-4 offset-md-2">
           <ul class="list-group">
-            <microphone></microphone>
             <!-- <recorder></recorder> -->
           </ul>
-
         </div>
       </div>
     </div>
@@ -55,8 +55,7 @@
         delayedAudible: null,
         files: [],
         index: 0,
-        blendTime: 5,
-        usingMicrophone: false,
+        blendTime: 5
       }
     },
 
@@ -73,6 +72,16 @@
     },
 
     methods: {
+
+      /**
+       * Force resize the canvas
+       *
+       * @return {void}
+       */
+      resizeCanvas() {
+        this.visualizer.renderer.width = this.baseWidth = $( window ).width()
+        this.visualizer.renderer.height = this.baseHeight = $( window ).height()
+      },
 
       /**
        * Updates preset

@@ -1,30 +1,41 @@
 <template>
-  <div>
-    <a href="#" class="list-group-item" :class="{'active': usingMicrophone}" @click="requestMicAudio">Connect mic</a>
-    <ul>
+  <span>
+    <a href="#" class="nav-link" :class="{'active': usingMicrophone}" @click="requestMicAudio"><i class="fas fa-microphone-alt fa-2x"></i></a>
+    <a href="#" v-show="usingMicrophone">{{ activeDevice.label }} test</a>
+    <ul class="nav flex-column nav-pills">
       <select name="devices" v-model="selectedDevice" id="">
         <option v-for="(device, index) in devices" :value="index">{{ device.label }}</option>
       </select>
     </ul>
-  </div>
+  </span>
 </template>
 
 <script>
   // record via https://developers.google.com/web/updates/2016/10/capture-stream and https://developers.google.com/web/updates/2016/01/mediarecorder
   export default {
-    name: "recorder",
+    name: "microphone",
 
     data() {
       return {
         devices: [],
         selectedDevice: 1,
-        usingMicrophone: false,
-        aduioContext: null
+        usingMicrophone: false
       }
     },
 
     mounted() {
       this.setupDevices();
+    },
+
+    computed: {
+      activeDevice() {
+        if(this.devices.length > 0) {
+          return this.devices[this.selectedDevice]
+        } else {
+          return { label: "" }
+        }
+
+      }
     },
 
     props: [
@@ -61,20 +72,13 @@
        */
        requestMicAudio() {
         var selectedDevice = this.devices[this.selectedDevice]
-        console.log(selectedDevice)
         var preciseDeviceConstraint = { deviceId: {exact: selectedDevice.deviceId } }
         var constraints = (selectedDevice.label == "" ? {audio: true} : preciseDeviceConstraint)
-        console.log(constraints)
-        console.log(this.$parent.audioContext)
         navigator.getUserMedia({
           audio: constraints
          }, (stream) => {
-          this.usingMicrophone = true;
           var micSourceNode = this.$parent.audioContext.createMediaStreamSource(stream);
-          console.log("audiocontext : ")
-          console.log(this.$parent.audioContext)
           this.connectMicAudio(micSourceNode, this.$parent.audioContext);
-          console.log(stream)
         }, (err) => {
           console.log('Error getting audio stream from getUserMedia');
         });
@@ -94,6 +98,8 @@
 
         console.log("audiocontext : ")
         console.log(this.$parent.audioContext)
+        this.usingMicrophone = true;
+
         this.$parent.audioContext.resume();
         var gainNode = this.$parent.audioContext.createGain();
         gainNode.gain.value = 1.25;

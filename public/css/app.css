@@ -10539,8 +10539,11 @@ form {
   float: right;
 }
 
+.wrapper {
+  position: relative;
+}
+
 .controls {
-  background: red;
   position: absolute;
   bottom: 0px;
   width: 100%;

@@ -23,10 +23,6 @@
       <input class="form-check-input" type="checkbox" id="presetRandom" v-model="presetRandom">
       <label class="form-check-label" for="random">Random</label>
     </div>
-
-    <p>Preset index : {{ presetIndex }}</p>
-
-
   </div>
 </template>
 

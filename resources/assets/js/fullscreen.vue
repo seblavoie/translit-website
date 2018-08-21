@@ -1,7 +1,7 @@
 <template>
-  <div>
-    <a href="#" class="list-group-item" @click="requestFullScreen">Fullscreen</a>
-  </div>
+  <span>
+    <a href="#" class="nav-link" @click="requestFullScreen"><span class="fas fa-arrows-alt fa-2x" data-fa-transform="rotate-45"></span></a>
+  </span>
 </template>
 
 <script>
@@ -31,19 +31,9 @@
        * @return {[type]} [description]
        */
        requestFullScreen() {
-        var _this = this
+        var _this = this;
         var handler = function handler() {
-         if (fscreen.fullscreenElement !== null) {
-            console.log('Entered fullscreen mode');
-         //    setTimeout(() => {
-         //      _this.visualizer.renderer.width = _this.baseWidth = $( window ).width()
-         //      _this.visualizer.renderer.height = _this.baseHeight = $( window ).height()
-         //      console.log(_this.baseWidth)
-         //    }, 500)
-          } else {
-         //    this.visualizer.renderer.width = this.baseWidth = 1920
-         //    this.visualizer.renderer.height = this.baseHeight = 1080
-          }
+          setTimeout(() => { _this.$parent.resizeCanvas() }, 100)
         }
 
         if (fscreen.fullscreenEnabled) {

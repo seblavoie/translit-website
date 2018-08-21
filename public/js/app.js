@@ -1695,8 +1695,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       delayedAudible: null,
       files: [],
       index: 0,
-      blendTime: 5,
-      usingMicrophone: false
+      blendTime: 5
     };
   },
   mounted: function mounted() {
@@ -1712,6 +1711,17 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
   },
 
   methods: {
+
+    /**
+     * Force resize the canvas
+     *
+     * @return {void}
+     */
+    resizeCanvas: function resizeCanvas() {
+      this.visualizer.renderer.width = this.baseWidth = $(window).width();
+      this.visualizer.renderer.height = this.baseHeight = $(window).height();
+    },
+
 
     /**
      * Updates preset
@@ -1927,17 +1937,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     requestFullScreen: function requestFullScreen() {
       var _this = this;
       var handler = function handler() {
-        if (__WEBPACK_IMPORTED_MODULE_0_fscreen___default.a.fullscreenElement !== null) {
-          console.log('Entered fullscreen mode');
-          //    setTimeout(() => {
-          //      _this.visualizer.renderer.width = _this.baseWidth = $( window ).width()
-          //      _this.visualizer.renderer.height = _this.baseHeight = $( window ).height()
-          //      console.log(_this.baseWidth)
-          //    }, 500)
-        } else {
-            //    this.visualizer.renderer.width = this.baseWidth = 1920
-            //    this.visualizer.renderer.height = this.baseHeight = 1080
-          }
+        setTimeout(function () {
+          _this.$parent.resizeCanvas();
+        }, 100);
       };
 
       if (__WEBPACK_IMPORTED_MODULE_0_fscreen___default.a.fullscreenEnabled) {
@@ -1966,23 +1968,33 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
 
 // record via https://developers.google.com/web/updates/2016/10/capture-stream and https://developers.google.com/web/updates/2016/01/mediarecorder
 /* harmony default export */ __webpack_exports__["default"] = ({
-  name: "recorder",
+  name: "microphone",
 
   data: function data() {
     return {
       devices: [],
       selectedDevice: 1,
-      usingMicrophone: false,
-      aduioContext: null
+      usingMicrophone: false
     };
   },
   mounted: function mounted() {
     this.setupDevices();
   },
 
+
+  computed: {
+    activeDevice: function activeDevice() {
+      if (this.devices.length > 0) {
+        return this.devices[this.selectedDevice];
+      } else {
+        return { label: "" };
+      }
+    }
+  },
 
   props: [],
 
@@ -2019,20 +2031,13 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       var _this2 = this;
 
       var selectedDevice = this.devices[this.selectedDevice];
-      console.log(selectedDevice);
       var preciseDeviceConstraint = { deviceId: { exact: selectedDevice.deviceId } };
       var constraints = selectedDevice.label == "" ? { audio: true } : preciseDeviceConstraint;
-      console.log(constraints);
-      console.log(this.$parent.audioContext);
       navigator.getUserMedia({
         audio: constraints
       }, function (stream) {
-        _this2.usingMicrophone = true;
         var micSourceNode = _this2.$parent.audioContext.createMediaStreamSource(stream);
-        console.log("audiocontext : ");
-        console.log(_this2.$parent.audioContext);
         _this2.connectMicAudio(micSourceNode, _this2.$parent.audioContext);
-        console.log(stream);
       }, function (err) {
         console.log('Error getting audio stream from getUserMedia');
       });
@@ -2053,6 +2058,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
       console.log("audiocontext : ");
       console.log(this.$parent.audioContext);
+      this.usingMicrophone = true;
+
       this.$parent.audioContext.resume();
       var gainNode = this.$parent.audioContext.createGain();
       gainNode.gain.value = 1.25;
@@ -2072,10 +2079,6 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 
-//
-//
-//
-//
 //
 //
 //
@@ -37197,19 +37200,35 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", [
+  return _c("span", [
     _c(
       "a",
       {
-        staticClass: "list-group-item",
+        staticClass: "nav-link",
         class: { active: _vm.usingMicrophone },
         attrs: { href: "#" },
         on: { click: _vm.requestMicAudio }
       },
-      [_vm._v("Connect mic")]
+      [_c("i", { staticClass: "fas fa-microphone-alt fa-2x" })]
     ),
     _vm._v(" "),
-    _c("ul", [
+    _c(
+      "a",
+      {
+        directives: [
+          {
+            name: "show",
+            rawName: "v-show",
+            value: _vm.usingMicrophone,
+            expression: "usingMicrophone"
+          }
+        ],
+        attrs: { href: "#" }
+      },
+      [_vm._v(_vm._s(_vm.activeDevice.label) + " test")]
+    ),
+    _vm._v(" "),
+    _c("ul", { staticClass: "nav flex-column nav-pills" }, [
       _c(
         "select",
         {
@@ -37266,15 +37285,20 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", [
+  return _c("span", [
     _c(
       "a",
       {
-        staticClass: "list-group-item",
+        staticClass: "nav-link",
         attrs: { href: "#" },
         on: { click: _vm.requestFullScreen }
       },
-      [_vm._v("Fullscreen")]
+      [
+        _c("span", {
+          staticClass: "fas fa-arrows-alt fa-2x",
+          attrs: { "data-fa-transform": "rotate-45" }
+        })
+      ]
     )
   ])
 }
@@ -37298,18 +37322,16 @@ var render = function() {
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
   return _c("div", [
-    _c("div", { staticClass: "container-fluid" }, [
-      _c("div", { staticClass: "row" }, [
-        _c("div", { staticClass: "col-12" }, [
-          _c("canvas", {
-            attrs: {
-              id: "canvas",
-              width: _vm.baseWidth,
-              height: _vm.baseHeight
-            }
-          }),
+    _c("div", { staticClass: "wrapper" }, [
+      _c("canvas", {
+        attrs: { id: "canvas", width: _vm.baseWidth, height: _vm.baseHeight }
+      }),
+      _vm._v(" "),
+      _c("div", { staticClass: "controls" }, [
+        _c("ul", { staticClass: "pull-right nav nav-pills" }, [
+          _c("li", { staticClass: "nav-item" }, [_c("microphone")], 1),
           _vm._v(" "),
-          _c("div", { staticClass: "controls" }, [_c("fullscreen")], 1)
+          _c("li", { attrs: { clas: "nav-item" } }, [_c("fullscreen")], 1)
         ])
       ])
     ]),
@@ -37356,14 +37378,21 @@ var render = function() {
           )
         ]),
         _vm._v(" "),
-        _c("div", { staticClass: "col-md-4 offset-md-2" }, [
-          _c("ul", { staticClass: "list-group" }, [_c("microphone")], 1)
-        ])
+        _vm._m(0)
       ])
     ])
   ])
 }
-var staticRenderFns = []
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "col-md-4 offset-md-2" }, [
+      _c("ul", { staticClass: "list-group" })
+    ])
+  }
+]
 render._withStripped = true
 module.exports = { render: render, staticRenderFns: staticRenderFns }
 if (false) {
@@ -37571,9 +37600,7 @@ var render = function() {
         { staticClass: "form-check-label", attrs: { for: "random" } },
         [_vm._v("Random")]
       )
-    ]),
-    _vm._v(" "),
-    _c("p", [_vm._v("Preset index : " + _vm._s(_vm.presetIndex))])
+    ])
   ])
 }
 var staticRenderFns = []
