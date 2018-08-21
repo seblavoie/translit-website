@@ -4,6 +4,7 @@
       <div class="row">
         <div class="col-12">
           <canvas id="canvas" :width="baseWidth" :height="baseHeight"></canvas>
+
           <div class="controls">
             <fullscreen></fullscreen>
           </div>
@@ -18,7 +19,6 @@
               <input class="form-control-file" type="file" accept="audio/*" multiple id="fileInput" @change="updateFileList">
             </div>
             <presets @preset="updatePreset" ref="presets"></presets>
-
           </form>
           <p>Song index : {{ index }}</p>
           <ol>
@@ -197,8 +197,7 @@
        * @return {[type]} [description]
        */
        initPlayer() {
-        var audioContext = this.getAudioContext();
-        this.audioContext = audioContext;
+        this.audioContext = this.getAudioContext();
         this.sendContextToViz()
       },
 
@@ -211,11 +210,11 @@
       getAudioContext() {
         var AudioContext = window.AudioContext // Default
             || window.webkitAudioContext // Safari and old versions of Chrome
-            || false; 
+            || false;
 
         if (AudioContext) {
             // Do whatever you want using the Web Audio API
-            return new AudioContext;
+            return new AudioContext();
             // ...
         } else {
             // Web Audio API is not supported

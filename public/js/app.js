@@ -1843,8 +1843,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
      * @return {[type]} [description]
      */
     initPlayer: function initPlayer() {
-      var audioContext = this.getAudioContext();
-      this.audioContext = audioContext;
+      this.audioContext = this.getAudioContext();
       this.sendContextToViz();
     },
 
