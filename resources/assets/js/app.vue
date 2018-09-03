@@ -11,6 +11,11 @@
         <ul class="pull-right nav nav-pills">
           <li class="nav-item">
             <a href="#" class="nav-link" @click="triggerUpload" v-b-tooltip.hover title="Upload files">
+              <span class="upcoming-files">
+                <span  v-for="(file, i) in files" v-bind:class="{ current : (i == index)}">
+                  “{{ file.name }}”,
+                </span>
+              </span>
               <i class="fas fa-file-upload fa-2x"></i>
             </a>
           </li>
@@ -74,6 +79,10 @@
       Recorder: require("./recorder.vue"),
       Fullscreen: require("./fullscreen.vue"),
       Microphone: require("./microphone.vue")
+    },
+
+    computed: {
+      // currentFile
     },
 
     methods: {
@@ -196,8 +205,8 @@
               setTimeout(() => {
                 if (_this.files.length > _this.index + 1) {
                               // goes to the next song
-                              // this.files.splice(_this.index)
-                              this.loadLocalFiles(_this.index + 1);
+                              _this.files.shift()
+                              _this.loadLocalFiles(0);
                             } else {
                               // finished
                               _this.sourceNode.disconnect();

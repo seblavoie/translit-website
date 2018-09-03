@@ -10553,6 +10553,7 @@ form {
 
 .controls {
   background: rgba(53, 88, 203, 0.5);
+  color: white;
   position: absolute;
   bottom: 6px;
   width: 100%;
@@ -10571,5 +10572,19 @@ form {
 
 form {
   margin: 0;
+}
+
+.upcoming-files {
+  position: absolute;
+  left: 80px;
+}
+
+.upcoming-files span {
+  opacity: .5;
+}
+
+.upcoming-files .current {
+  font-weight: bold;
+  opacity: 1 !important;
 }
 

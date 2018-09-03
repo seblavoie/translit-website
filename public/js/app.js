@@ -1684,6 +1684,11 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
 
 // record via https://developers.google.com/web/updates/2016/10/capture-stream and https://developers.google.com/web/updates/2016/01/mediarecorder
 
@@ -1713,6 +1718,10 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     Recorder: __webpack_require__("./resources/assets/js/recorder.vue"),
     Fullscreen: __webpack_require__("./resources/assets/js/fullscreen.vue"),
     Microphone: __webpack_require__("./resources/assets/js/microphone.vue")
+  },
+
+  computed: {
+    // currentFile
   },
 
   methods: {
@@ -1835,15 +1844,13 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
       var reader = new FileReader();
       reader.onload = function (event) {
-        var _this2 = this;
-
         _this.audioContext.decodeAudioData(event.target.result, function (buf) {
           _this.playBufferSource(buf);
           setTimeout(function () {
             if (_this.files.length > _this.index + 1) {
               // goes to the next song
-              // this.files.splice(_this.index)
-              _this2.loadLocalFiles(_this.index + 1);
+              _this.files.shift();
+              _this.loadLocalFiles(0);
             } else {
               // finished
               _this.sourceNode.disconnect();
@@ -1862,7 +1869,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
      * @return {[type]} [description]
      */
     initPlayer: function initPlayer() {
-      var _this3 = this;
+      var _this2 = this;
 
       this.audioContext = this.getAudioContext();
       this.sendContextToViz();
@@ -1870,7 +1877,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       $(window).on('resize', function (e) {
         clearTimeout(resizeTimer);
         resizeTimer = setTimeout(function () {
-          _this3.resizeCanvas();
+          _this2.resizeCanvas();
         }, 50);
       });
     },
@@ -54684,7 +54691,23 @@ var render = function() {
                 attrs: { href: "#", title: "Upload files" },
                 on: { click: _vm.triggerUpload }
               },
-              [_c("i", { staticClass: "fas fa-file-upload fa-2x" })]
+              [
+                _c(
+                  "span",
+                  { staticClass: "upcoming-files" },
+                  _vm._l(_vm.files, function(file, i) {
+                    return _c("span", { class: { current: i == _vm.index } }, [
+                      _vm._v(
+                        "\n                  “" +
+                          _vm._s(file.name) +
+                          "”,\n                "
+                      )
+                    ])
+                  })
+                ),
+                _vm._v(" "),
+                _c("i", { staticClass: "fas fa-file-upload fa-2x" })
+              ]
             )
           ]),
           _vm._v(" "),
