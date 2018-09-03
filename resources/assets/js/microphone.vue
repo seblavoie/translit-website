@@ -5,9 +5,11 @@
     </a>
 
     <b-popover target="popoverMicrophone" triggers="focus">
-       <ul class="nav flex-column nav-pills">
+      <p v-if="activeDevice.label == ''">Great! We're connected to your default microphone. If you want to choose another microphone, <a href="/">refresh the page</a> and we'll list your options.</p>
+
+       <ul class="nav flex-column nav-pills" v-else>
          <li class="nav-item" v-for="(device, index) in devices">
-           <a href="#" class="nav-link" :class="{'active': selectedDevice == index}" @click="changeDevice(index)">{{ device.label }}</a>
+           <a href="#" class="nav-link" :class="{'active': selectedDeviceIndex == index}" @click="changeDevice(index)">{{ device.label }}</a>
          </li>
        </ul>
     </b-popover>
@@ -23,20 +25,19 @@
       return {
         devices: [],
         devicesMenuVisible: false,
-        selectedDevice: 0,
+        selectedDeviceIndex: 0,
         usingMicrophone: false
       }
     },
 
     mounted() {
-      this.setupDevices();
-      this.setupPopover();
+      this.storeAudioDevices();
     },
 
     computed: {
       activeDevice() {
         if(this.devices.length > 0) {
-          return this.devices[this.selectedDevice]
+          return this.devices[this.selectedDeviceIndex]
         } else {
           return { label: "" }
         }
@@ -50,35 +51,7 @@
     methods: {
 
       changeDevice(index) {
-        this.selectedDevice = index
-      },
-
-      /**
-       * Sets up the popover menu
-       *
-       * @return {void}
-       */
-      setupPopover() {
-        $(function () {
-          $('[data-toggle="popover"]').each(function() {
-            console.log("popover")
-          })
-          $('[data-toggle="popover"]').popover({
-            html: true,
-            container: "body",
-            content: function() {
-              var content = $(this).attr("data-popover-content");
-              return $(content).html();
-            },
-            title: function() {
-              var title = $(this).attr("data-popover-heading");
-              return $(title).children(".popover-heading").html();
-            }
-
-          }).on('show.bs.popover', function() {
-            $('#popper-content').addClass('show')
-          })
-        })
+        this.selectedDeviceIndex = index
       },
 
       /**
@@ -86,7 +59,8 @@
        *
        * @return {void}
        */
-      setupDevices() {
+      storeAudioDevices() {
+        this.devices = [];
         navigator.mediaDevices.enumerateDevices()
         .then((deviceInfos) => {
           for (var i = 0; i !== deviceInfos.length; ++i) {
@@ -110,9 +84,8 @@
        * @return {}
        */
        requestMicAudio() {
-        var selectedDevice = this.devices[this.selectedDevice]
         var preciseDeviceConstraint = { deviceId: {exact: this.activeDevice.deviceId } }
-        var constraints = (selectedDevice.label == "" ? {audio: true} : preciseDeviceConstraint)
+        var constraints = (this.activeDevice.label == "" ? {audio: true} : preciseDeviceConstraint)
         navigator.getUserMedia({
           audio: constraints
          }, (stream) => {
@@ -132,13 +105,7 @@
        * @return {[type]}              [description]
        */
        connectMicAudio(sourceNode, audioContext) {
-        console.log(sourceNode)
-        console.log("connect mic audio")
-
-        console.log("audiocontext : ")
-        console.log(this.$parent.audioContext)
         this.usingMicrophone = true;
-
         this.$parent.audioContext.resume();
         var gainNode = this.$parent.audioContext.createGain();
         gainNode.gain.value = 1.25;

@@ -2000,6 +2000,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
 
 // record via https://developers.google.com/web/updates/2016/10/capture-stream and https://developers.google.com/web/updates/2016/01/mediarecorder
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -2009,20 +2011,19 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     return {
       devices: [],
       devicesMenuVisible: false,
-      selectedDevice: 0,
+      selectedDeviceIndex: 0,
       usingMicrophone: false
     };
   },
   mounted: function mounted() {
-    this.setupDevices();
-    this.setupPopover();
+    this.storeAudioDevices();
   },
 
 
   computed: {
     activeDevice: function activeDevice() {
       if (this.devices.length > 0) {
-        return this.devices[this.selectedDevice];
+        return this.devices[this.selectedDeviceIndex];
       } else {
         return { label: "" };
       }
@@ -2033,36 +2034,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
   methods: {
     changeDevice: function changeDevice(index) {
-      this.selectedDevice = index;
-    },
-
-
-    /**
-     * Sets up the popover menu
-     *
-     * @return {void}
-     */
-    setupPopover: function setupPopover() {
-      $(function () {
-        $('[data-toggle="popover"]').each(function () {
-          console.log("popover");
-        });
-        $('[data-toggle="popover"]').popover({
-          html: true,
-          container: "body",
-          content: function content() {
-            var content = $(this).attr("data-popover-content");
-            return $(content).html();
-          },
-          title: function title() {
-            var title = $(this).attr("data-popover-heading");
-            return $(title).children(".popover-heading").html();
-          }
-
-        }).on('show.bs.popover', function () {
-          $('#popper-content').addClass('show');
-        });
-      });
+      this.selectedDeviceIndex = index;
     },
 
 
@@ -2071,9 +2043,10 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
      *
      * @return {void}
      */
-    setupDevices: function setupDevices() {
+    storeAudioDevices: function storeAudioDevices() {
       var _this = this;
 
+      this.devices = [];
       navigator.mediaDevices.enumerateDevices().then(function (deviceInfos) {
         for (var i = 0; i !== deviceInfos.length; ++i) {
           if (deviceInfos[i].kind == "audioinput") {
@@ -2098,9 +2071,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     requestMicAudio: function requestMicAudio() {
       var _this2 = this;
 
-      var selectedDevice = this.devices[this.selectedDevice];
       var preciseDeviceConstraint = { deviceId: { exact: this.activeDevice.deviceId } };
-      var constraints = selectedDevice.label == "" ? { audio: true } : preciseDeviceConstraint;
+      var constraints = this.activeDevice.label == "" ? { audio: true } : preciseDeviceConstraint;
       navigator.getUserMedia({
         audio: constraints
       }, function (stream) {
@@ -2121,13 +2093,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
      * @return {[type]}              [description]
      */
     connectMicAudio: function connectMicAudio(sourceNode, audioContext) {
-      console.log(sourceNode);
-      console.log("connect mic audio");
-
-      console.log("audiocontext : ");
-      console.log(this.$parent.audioContext);
       this.usingMicrophone = true;
-
       this.$parent.audioContext.resume();
       var gainNode = this.$parent.audioContext.createGain();
       gainNode.gain.value = 1.25;
@@ -54564,28 +54530,36 @@ var render = function() {
         "b-popover",
         { attrs: { target: "popoverMicrophone", triggers: "focus" } },
         [
-          _c(
-            "ul",
-            { staticClass: "nav flex-column nav-pills" },
-            _vm._l(_vm.devices, function(device, index) {
-              return _c("li", { staticClass: "nav-item" }, [
-                _c(
-                  "a",
-                  {
-                    staticClass: "nav-link",
-                    class: { active: _vm.selectedDevice == index },
-                    attrs: { href: "#" },
-                    on: {
-                      click: function($event) {
-                        _vm.changeDevice(index)
-                      }
-                    }
-                  },
-                  [_vm._v(_vm._s(device.label))]
-                )
+          _vm.activeDevice.label == ""
+            ? _c("p", [
+                _vm._v(
+                  "Great! We're connected to your default microphone. If you want to choose another microphone, "
+                ),
+                _c("a", { attrs: { href: "/" } }, [_vm._v("refresh the page")]),
+                _vm._v(" and we'll list your options.")
               ])
-            })
-          )
+            : _c(
+                "ul",
+                { staticClass: "nav flex-column nav-pills" },
+                _vm._l(_vm.devices, function(device, index) {
+                  return _c("li", { staticClass: "nav-item" }, [
+                    _c(
+                      "a",
+                      {
+                        staticClass: "nav-link",
+                        class: { active: _vm.selectedDeviceIndex == index },
+                        attrs: { href: "#" },
+                        on: {
+                          click: function($event) {
+                            _vm.changeDevice(index)
+                          }
+                        }
+                      },
+                      [_vm._v(_vm._s(device.label))]
+                    )
+                  ])
+                })
+              )
         ]
       )
     ],
