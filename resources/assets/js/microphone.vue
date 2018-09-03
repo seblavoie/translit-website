@@ -1,12 +1,14 @@
 <template>
   <span>
-    <a href="#" class="nav-link" :class="{'active': usingMicrophone}" @click="requestMicAudio"><i class="fas fa-microphone-alt fa-2x"></i></a>
-    <a href="#" v-show="usingMicrophone">{{ activeDevice.label }} test</a>
-    <ul class="nav flex-column nav-pills">
-      <select name="devices" v-model="selectedDevice" id="">
-        <option v-for="(device, index) in devices" :value="index">{{ device.label }}</option>
-      </select>
-    </ul>
+    <a href="#" class="nav-link" :class="{'active': usingMicrophone}" @click="requestMicAudio" id="popoverMicrophone"><i class="fas fa-microphone-alt fa-2x"></i>{{ selectedDevice }}</a>
+
+    <b-popover target="popoverMicrophone" triggers="focus">
+       <ul class="nav flex-column nav-pills">
+         <li class="nav-item" v-for="(device, index) in devices">
+           <a href="#" class="nav-link" :class="{'active': selectedDevice == index}" @click="changeDevice(index)">{{ device.label }}</a>
+         </li>
+       </ul>
+    </b-popover>
   </span>
 </template>
 
@@ -18,13 +20,15 @@
     data() {
       return {
         devices: [],
-        selectedDevice: 1,
+        devicesMenuVisible: false,
+        selectedDevice: 0,
         usingMicrophone: false
       }
     },
 
     mounted() {
       this.setupDevices();
+      this.setupPopover();
     },
 
     computed: {
@@ -34,7 +38,6 @@
         } else {
           return { label: "" }
         }
-
       }
     },
 
@@ -43,6 +46,40 @@
     ],
 
     methods: {
+
+      changeDevice(index) {
+        alert(index)
+        this.selectedDevice = index
+      },
+
+      /**
+       * Sets up the popover menu
+       *
+       * @return {void}
+       */
+      setupPopover() {
+        $(function () {
+          $('[data-toggle="popover"]').each(function() {
+            console.log("popover")
+          })
+          $('[data-toggle="popover"]').popover({
+            html: true,
+            container: "body",
+            // trigger: "hover",
+            content: function() {
+              var content = $(this).attr("data-popover-content");
+              return $(content).html();
+            },
+            title: function() {
+              var title = $(this).attr("data-popover-heading");
+              return $(title).children(".popover-heading").html();
+            }
+
+          }).on('show.bs.popover', function() {
+            $('#popper-content').addClass('show')
+          })
+        })
+      },
 
       /**
        * Setup devices
@@ -53,8 +90,10 @@
         navigator.mediaDevices.enumerateDevices()
         .then((deviceInfos) => {
           for (var i = 0; i !== deviceInfos.length; ++i) {
-            console.log(deviceInfos[i])
-            this.devices.push(deviceInfos[i])
+            if(deviceInfos[i].kind == "audioinput") {
+              this.devices.push(deviceInfos[i])
+              console.log(this.devices)
+            }
           }
         })
         .catch(() => {
@@ -72,7 +111,7 @@
        */
        requestMicAudio() {
         var selectedDevice = this.devices[this.selectedDevice]
-        var preciseDeviceConstraint = { deviceId: {exact: selectedDevice.deviceId } }
+        var preciseDeviceConstraint = { deviceId: {exact: this.activeDevice.deviceId } }
         var constraints = (selectedDevice.label == "" ? {audio: true} : preciseDeviceConstraint)
         navigator.getUserMedia({
           audio: constraints
