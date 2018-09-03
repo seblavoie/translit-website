@@ -1,6 +1,8 @@
 <template>
   <span>
-    <a href="#" class="nav-link" @click="requestFullScreen"><span class="fas fa-arrows-alt fa-2x" data-fa-transform="rotate-45"></span></a>
+    <a href="#" class="nav-link" @click="requestFullScreen"  v-b-tooltip.hover title="Fullscreen mode">
+      <span class="fas fa-arrows-alt fa-2x" data-fa-transform="rotate-45"></span>
+    </a>
   </span>
 </template>
 

@@ -1704,6 +1704,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
   },
   mounted: function mounted() {
     this.initPlayer();
+    this.resizeCanvas();
   },
 
 
@@ -1773,6 +1774,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       });
       this.visualizer.render();
     },
+    triggerUpload: function triggerUpload() {
+      $("#fileInput").trigger("click");
+    },
 
 
     /**
@@ -1801,7 +1805,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 
     /**
-     * Update file list
+     * Update file list upon file upload
      *
      * @param  {event} event
      *
@@ -1838,6 +1842,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
           setTimeout(function () {
             if (_this.files.length > _this.index + 1) {
               // goes to the next song
+              // this.files.splice(_this.index)
               _this2.loadLocalFiles(_this.index + 1);
             } else {
               // finished
@@ -1857,8 +1862,17 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
      * @return {[type]} [description]
      */
     initPlayer: function initPlayer() {
+      var _this3 = this;
+
       this.audioContext = this.getAudioContext();
       this.sendContextToViz();
+      var resizeTimer;
+      $(window).on('resize', function (e) {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(function () {
+          _this3.resizeCanvas();
+        }, 50);
+      });
     },
 
 
@@ -1917,6 +1931,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
 
 
 
@@ -1961,6 +1977,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+//
+//
 //
 //
 //
@@ -54516,9 +54534,20 @@ var render = function() {
       _c(
         "a",
         {
+          directives: [
+            {
+              name: "b-tooltip",
+              rawName: "v-b-tooltip.hover",
+              modifiers: { hover: true }
+            }
+          ],
           staticClass: "nav-link",
           class: { active: _vm.usingMicrophone },
-          attrs: { href: "#", id: "popoverMicrophone" },
+          attrs: {
+            href: "#",
+            id: "popoverMicrophone",
+            title: "Connect microphone"
+          },
           on: { click: _vm.requestMicAudio }
         },
         [_c("i", { staticClass: "fas fa-microphone-alt fa-2x" })]
@@ -54579,8 +54608,15 @@ var render = function() {
     _c(
       "a",
       {
+        directives: [
+          {
+            name: "b-tooltip",
+            rawName: "v-b-tooltip.hover",
+            modifiers: { hover: true }
+          }
+        ],
         staticClass: "nav-link",
-        attrs: { href: "#" },
+        attrs: { href: "#", title: "Fullscreen mode" },
         on: { click: _vm.requestFullScreen }
       },
       [
@@ -54633,6 +54669,25 @@ var render = function() {
         ]),
         _vm._v(" "),
         _c("ul", { staticClass: "pull-right nav nav-pills" }, [
+          _c("li", { staticClass: "nav-item" }, [
+            _c(
+              "a",
+              {
+                directives: [
+                  {
+                    name: "b-tooltip",
+                    rawName: "v-b-tooltip.hover",
+                    modifiers: { hover: true }
+                  }
+                ],
+                staticClass: "nav-link",
+                attrs: { href: "#", title: "Upload files" },
+                on: { click: _vm.triggerUpload }
+              },
+              [_c("i", { staticClass: "fas fa-file-upload fa-2x" })]
+            )
+          ]),
+          _vm._v(" "),
           _c("li", { staticClass: "nav-item" }, [_c("microphone")], 1),
           _vm._v(" "),
           _c("li", { attrs: { clas: "nav-item" } }, [_c("fullscreen")], 1)
@@ -54640,7 +54695,7 @@ var render = function() {
       ])
     ]),
     _vm._v(" "),
-    _c("div", { staticClass: "container" }, [
+    _c("div", { staticClass: "container", staticStyle: { display: "none" } }, [
       _c("div", { staticClass: "row" }, [
         _c("div", { staticClass: "col-6" }, [
           _c("form", { attrs: { action: "form-horizontal" } }, [
@@ -54658,18 +54713,7 @@ var render = function() {
             ])
           ]),
           _vm._v(" "),
-          _c("p", [_vm._v("Song index : " + _vm._s(_vm.index))]),
-          _vm._v(" "),
-          _c(
-            "ol",
-            _vm._l(_vm.files, function(file, i) {
-              return _c("li", { class: { bold: i == _vm.index } }, [
-                _vm._v(
-                  "\n              " + _vm._s(file.name) + "\n            "
-                )
-              ])
-            })
-          )
+          _c("p", [_vm._v("Song index : " + _vm._s(_vm.index))])
         ]),
         _vm._v(" "),
         _vm._m(0)

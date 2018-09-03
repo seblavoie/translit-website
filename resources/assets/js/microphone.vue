@@ -1,6 +1,8 @@
 <template>
   <span>
-    <a href="#" class="nav-link" :class="{'active': usingMicrophone}" @click="requestMicAudio" id="popoverMicrophone"><i class="fas fa-microphone-alt fa-2x"></i></a>
+    <a href="#" class="nav-link" :class="{'active': usingMicrophone}" @click="requestMicAudio" id="popoverMicrophone"  v-b-tooltip.hover title="Connect microphone">
+      <i class="fas fa-microphone-alt fa-2x"></i>
+    </a>
 
     <b-popover target="popoverMicrophone" triggers="focus">
        <ul class="nav flex-column nav-pills">

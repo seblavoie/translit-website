@@ -10,6 +10,11 @@
         </ul>
         <ul class="pull-right nav nav-pills">
           <li class="nav-item">
+            <a href="#" class="nav-link" @click="triggerUpload" v-b-tooltip.hover title="Upload files">
+              <i class="fas fa-file-upload fa-2x"></i>
+            </a>
+          </li>
+          <li class="nav-item">
             <microphone></microphone>
           </li>
           <li clas="nav-item">
@@ -18,7 +23,7 @@
         </ul>
       </div>
     </div>
-    <div class="container">
+    <div class="container" style="display: none">
       <div class="row">
         <div class="col-6">
           <form action="form-horizontal">
@@ -27,11 +32,6 @@
             </div>
           </form>
           <p>Song index : {{ index }}</p>
-          <ol>
-            <li v-for="(file, i) in files" v-bind:class="{ bold : (i == index)}">
-              {{ file.name }}
-            </li>
-          </ol>
         </div>
         <div class="col-md-4 offset-md-2">
           <ul class="list-group">
@@ -65,6 +65,7 @@
 
     mounted() {
       this.initPlayer();
+      this.resizeCanvas();
     },
 
 
@@ -132,6 +133,10 @@
         this.visualizer.render();
       },
 
+      triggerUpload() {
+        $("#fileInput").trigger("click");
+      },
+
       /**
        * Play buffer source
        *
@@ -157,7 +162,7 @@
       },
 
       /**
-       * Update file list
+       * Update file list upon file upload
        *
        * @param  {event} event
        *
@@ -191,6 +196,7 @@
               setTimeout(() => {
                 if (_this.files.length > _this.index + 1) {
                               // goes to the next song
+                              // this.files.splice(_this.index)
                               this.loadLocalFiles(_this.index + 1);
                             } else {
                               // finished
@@ -212,6 +218,13 @@
        initPlayer() {
         this.audioContext = this.getAudioContext();
         this.sendContextToViz()
+        var resizeTimer;
+        $(window).on('resize', (e) => {
+          clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+              this.resizeCanvas();
+            }, 50);
+        });
       },
 
 
