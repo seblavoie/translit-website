@@ -3,6 +3,11 @@
     <div class="wrapper">
       <canvas id="canvas" :width="baseWidth" :height="baseHeight"></canvas>
       <div class="controls">
+        <ul class="pull-left nav nav-pills">
+          <li class="nav-item">
+            <presets @preset="updatePreset" ref="presets"></presets>
+          </li>
+        </ul>
         <ul class="pull-right nav nav-pills">
           <li class="nav-item">
             <microphone></microphone>
@@ -20,7 +25,6 @@
             <div class="form-group row">
               <input class="form-control-file" type="file" accept="audio/*" multiple id="fileInput" @change="updateFileList">
             </div>
-            <presets @preset="updatePreset" ref="presets"></presets>
           </form>
           <p>Song index : {{ index }}</p>
           <ol>

@@ -1680,6 +1680,10 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
 
 // record via https://developers.google.com/web/updates/2016/10/capture-stream and https://developers.google.com/web/updates/2016/01/mediarecorder
 
@@ -2004,7 +2008,6 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
   methods: {
     changeDevice: function changeDevice(index) {
-      alert(index);
       this.selectedDevice = index;
     },
 
@@ -2022,7 +2025,6 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         $('[data-toggle="popover"]').popover({
           html: true,
           container: "body",
-          // trigger: "hover",
           content: function content() {
             var content = $(this).attr("data-popover-content");
             return $(content).html();
@@ -2148,6 +2150,23 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 // app.visualizer.audioNode.context.currentTime
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -2156,12 +2175,13 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
   data: function data() {
     return {
       cycleInterval: null,
-      presetCycle: false,
+      presetCycle: true,
       presetCycleLength: 15,
       presetRandom: false,
       presets: {},
       presetKeys: [],
-      presetIndex: 0
+      presetIndex: 0,
+      popoverSettingsVisible: false
     };
   },
   mounted: function mounted() {
@@ -54501,10 +54521,7 @@ var render = function() {
           attrs: { href: "#", id: "popoverMicrophone" },
           on: { click: _vm.requestMicAudio }
         },
-        [
-          _c("i", { staticClass: "fas fa-microphone-alt fa-2x" }),
-          _vm._v(_vm._s(_vm.selectedDevice))
-        ]
+        [_c("i", { staticClass: "fas fa-microphone-alt fa-2x" })]
       ),
       _vm._v(" "),
       _c(
@@ -54601,6 +54618,20 @@ var render = function() {
       }),
       _vm._v(" "),
       _c("div", { staticClass: "controls" }, [
+        _c("ul", { staticClass: "pull-left nav nav-pills" }, [
+          _c(
+            "li",
+            { staticClass: "nav-item" },
+            [
+              _c("presets", {
+                ref: "presets",
+                on: { preset: _vm.updatePreset }
+              })
+            ],
+            1
+          )
+        ]),
+        _vm._v(" "),
         _c("ul", { staticClass: "pull-right nav nav-pills" }, [
           _c("li", { staticClass: "nav-item" }, [_c("microphone")], 1),
           _vm._v(" "),
@@ -54612,30 +54643,20 @@ var render = function() {
     _c("div", { staticClass: "container" }, [
       _c("div", { staticClass: "row" }, [
         _c("div", { staticClass: "col-6" }, [
-          _c(
-            "form",
-            { attrs: { action: "form-horizontal" } },
-            [
-              _c("div", { staticClass: "form-group row" }, [
-                _c("input", {
-                  staticClass: "form-control-file",
-                  attrs: {
-                    type: "file",
-                    accept: "audio/*",
-                    multiple: "",
-                    id: "fileInput"
-                  },
-                  on: { change: _vm.updateFileList }
-                })
-              ]),
-              _vm._v(" "),
-              _c("presets", {
-                ref: "presets",
-                on: { preset: _vm.updatePreset }
+          _c("form", { attrs: { action: "form-horizontal" } }, [
+            _c("div", { staticClass: "form-group row" }, [
+              _c("input", {
+                staticClass: "form-control-file",
+                attrs: {
+                  type: "file",
+                  accept: "audio/*",
+                  multiple: "",
+                  id: "fileInput"
+                },
+                on: { change: _vm.updateFileList }
               })
-            ],
-            1
-          ),
+            ])
+          ]),
           _vm._v(" "),
           _c("p", [_vm._v("Song index : " + _vm._s(_vm.index))]),
           _vm._v(" "),
@@ -54684,197 +54705,232 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", [
-    _c("div", { staticClass: "form-group row" }, [
+  return _c(
+    "span",
+    [
       _c(
-        "label",
-        { staticClass: "col-md-2 col-form-label", attrs: { for: "preset" } },
-        [_vm._v("Preset: ")]
-      ),
-      _vm._v(" "),
-      _c("div", { staticClass: "col-md-4" }, [
-        _c(
-          "select",
-          {
-            directives: [
-              {
-                name: "model",
-                rawName: "v-model",
-                value: _vm.presetIndex,
-                expression: "presetIndex"
-              }
-            ],
-            staticClass: "form-control",
-            attrs: { id: "presetSelect", name: "preset" },
-            on: {
-              change: [
-                function($event) {
-                  var $$selectedVal = Array.prototype.filter
-                    .call($event.target.options, function(o) {
-                      return o.selected
-                    })
-                    .map(function(o) {
-                      var val = "_value" in o ? o._value : o.value
-                      return val
-                    })
-                  _vm.presetIndex = $event.target.multiple
-                    ? $$selectedVal
-                    : $$selectedVal[0]
-                },
-                _vm.requestPreset
-              ]
-            }
-          },
-          _vm._l(_vm.presetKeys, function(choice, index) {
-            return _c("option", { domProps: { value: index } }, [
-              _vm._v(_vm._s(choice))
-            ])
-          })
-        )
-      ])
-    ]),
-    _vm._v(" "),
-    _c("div", { staticClass: "form-check form-check-special row" }, [
-      _c("input", {
-        directives: [
-          {
-            name: "model",
-            rawName: "v-model",
-            value: _vm.presetCycle,
-            expression: "presetCycle"
-          }
-        ],
-        staticClass: "form-check-input",
-        attrs: { type: "checkbox", id: "presetCycle" },
-        domProps: {
-          checked: Array.isArray(_vm.presetCycle)
-            ? _vm._i(_vm.presetCycle, null) > -1
-            : _vm.presetCycle
-        },
-        on: {
-          change: [
-            function($event) {
-              var $$a = _vm.presetCycle,
-                $$el = $event.target,
-                $$c = $$el.checked ? true : false
-              if (Array.isArray($$a)) {
-                var $$v = null,
-                  $$i = _vm._i($$a, $$v)
-                if ($$el.checked) {
-                  $$i < 0 && (_vm.presetCycle = $$a.concat([$$v]))
-                } else {
-                  $$i > -1 &&
-                    (_vm.presetCycle = $$a
-                      .slice(0, $$i)
-                      .concat($$a.slice($$i + 1)))
-                }
-              } else {
-                _vm.presetCycle = $$c
-              }
-            },
-            _vm.restartCycleInterval
-          ]
-        }
-      }),
-      _vm._v(" "),
-      _c(
-        "label",
+        "a",
         {
-          staticClass: "form-check-label",
-          attrs: { for: "cycle" },
-          model: {
-            value: _vm.presetCycle,
-            callback: function($$v) {
-              _vm.presetCycle = $$v
-            },
-            expression: "presetCycle"
-          }
+          staticClass: "nav-link",
+          class: { active: _vm.popoverSettingsVisible },
+          attrs: { href: "#", id: "popoverSettings" },
+          on: { click: function($event) {} }
         },
-        [_vm._v("Cycle")]
+        [_c("i", { staticClass: "fas fa-2x fa-sliders-h" })]
       ),
       _vm._v(" "),
-      _vm.presetCycle
-        ? _c("span", [
-            _vm._v(" for\n      "),
-            _c("input", {
-              directives: [
-                {
-                  name: "model",
-                  rawName: "v-model",
-                  value: _vm.presetCycleLength,
-                  expression: "presetCycleLength"
-                }
-              ],
-              staticClass: "form-control col-md-2",
-              attrs: {
-                type: "number",
-                id: "presetCycleLength",
-                step: "1",
-                min: "1"
-              },
-              domProps: { value: _vm.presetCycleLength },
-              on: {
-                change: _vm.restartCycleInterval,
-                input: function($event) {
-                  if ($event.target.composing) {
-                    return
-                  }
-                  _vm.presetCycleLength = $event.target.value
-                }
-              }
-            }),
-            _vm._v("\n      seconds\n    ")
-          ])
-        : _vm._e()
-    ]),
-    _vm._v(" "),
-    _c("div", { staticClass: "form-check row" }, [
-      _c("input", {
-        directives: [
-          {
-            name: "model",
-            rawName: "v-model",
-            value: _vm.presetRandom,
-            expression: "presetRandom"
-          }
-        ],
-        staticClass: "form-check-input",
-        attrs: { type: "checkbox", id: "presetRandom" },
-        domProps: {
-          checked: Array.isArray(_vm.presetRandom)
-            ? _vm._i(_vm.presetRandom, null) > -1
-            : _vm.presetRandom
-        },
-        on: {
-          change: function($event) {
-            var $$a = _vm.presetRandom,
-              $$el = $event.target,
-              $$c = $$el.checked ? true : false
-            if (Array.isArray($$a)) {
-              var $$v = null,
-                $$i = _vm._i($$a, $$v)
-              if ($$el.checked) {
-                $$i < 0 && (_vm.presetRandom = $$a.concat([$$v]))
-              } else {
-                $$i > -1 &&
-                  (_vm.presetRandom = $$a
-                    .slice(0, $$i)
-                    .concat($$a.slice($$i + 1)))
-              }
-            } else {
-              _vm.presetRandom = $$c
-            }
-          }
-        }
-      }),
-      _vm._v(" "),
       _c(
-        "label",
-        { staticClass: "form-check-label", attrs: { for: "random" } },
-        [_vm._v("Random")]
+        "b-popover",
+        {
+          attrs: {
+            target: "popoverSettings",
+            triggers: "focus",
+            placement: "topleft"
+          }
+        },
+        [
+          _c("form", { attrs: { action: "" } }, [
+            _c("div", { staticClass: "form-group row" }, [
+              _c("div", { staticClass: "col" }, [
+                _c(
+                  "select",
+                  {
+                    directives: [
+                      {
+                        name: "model",
+                        rawName: "v-model",
+                        value: _vm.presetIndex,
+                        expression: "presetIndex"
+                      }
+                    ],
+                    staticClass: "form-control",
+                    attrs: { id: "presetSelect", name: "preset" },
+                    on: {
+                      change: [
+                        function($event) {
+                          var $$selectedVal = Array.prototype.filter
+                            .call($event.target.options, function(o) {
+                              return o.selected
+                            })
+                            .map(function(o) {
+                              var val = "_value" in o ? o._value : o.value
+                              return val
+                            })
+                          _vm.presetIndex = $event.target.multiple
+                            ? $$selectedVal
+                            : $$selectedVal[0]
+                        },
+                        _vm.requestPreset
+                      ]
+                    }
+                  },
+                  _vm._l(_vm.presetKeys, function(choice, index) {
+                    return _c("option", { domProps: { value: index } }, [
+                      _vm._v(_vm._s(choice))
+                    ])
+                  })
+                )
+              ])
+            ]),
+            _vm._v(" "),
+            _c("div", { staticClass: "form-group row" }, [
+              _c("div", { staticClass: "col" }, [
+                _c("div", { staticClass: "form-check form-check-special" }, [
+                  _c("input", {
+                    directives: [
+                      {
+                        name: "model",
+                        rawName: "v-model",
+                        value: _vm.presetCycle,
+                        expression: "presetCycle"
+                      }
+                    ],
+                    staticClass: "form-check-input",
+                    attrs: { type: "checkbox", id: "presetCycle" },
+                    domProps: {
+                      checked: Array.isArray(_vm.presetCycle)
+                        ? _vm._i(_vm.presetCycle, null) > -1
+                        : _vm.presetCycle
+                    },
+                    on: {
+                      change: [
+                        function($event) {
+                          var $$a = _vm.presetCycle,
+                            $$el = $event.target,
+                            $$c = $$el.checked ? true : false
+                          if (Array.isArray($$a)) {
+                            var $$v = null,
+                              $$i = _vm._i($$a, $$v)
+                            if ($$el.checked) {
+                              $$i < 0 && (_vm.presetCycle = $$a.concat([$$v]))
+                            } else {
+                              $$i > -1 &&
+                                (_vm.presetCycle = $$a
+                                  .slice(0, $$i)
+                                  .concat($$a.slice($$i + 1)))
+                            }
+                          } else {
+                            _vm.presetCycle = $$c
+                          }
+                        },
+                        _vm.restartCycleInterval
+                      ]
+                    }
+                  }),
+                  _vm._v(" "),
+                  _c(
+                    "label",
+                    {
+                      staticClass: "form-check-label",
+                      attrs: { for: "cycle" },
+                      model: {
+                        value: _vm.presetCycle,
+                        callback: function($$v) {
+                          _vm.presetCycle = $$v
+                        },
+                        expression: "presetCycle"
+                      }
+                    },
+                    [_vm._v("Cycle")]
+                  ),
+                  _vm._v(" "),
+                  _vm.presetCycle
+                    ? _c("span", [
+                        _vm._v(" for\n              "),
+                        _c("input", {
+                          directives: [
+                            {
+                              name: "model",
+                              rawName: "v-model",
+                              value: _vm.presetCycleLength,
+                              expression: "presetCycleLength"
+                            }
+                          ],
+                          staticClass:
+                            "form-control col-md-3 form-control-tight",
+                          attrs: {
+                            type: "number",
+                            id: "presetCycleLength",
+                            step: "1",
+                            min: "1"
+                          },
+                          domProps: { value: _vm.presetCycleLength },
+                          on: {
+                            change: _vm.restartCycleInterval,
+                            input: function($event) {
+                              if ($event.target.composing) {
+                                return
+                              }
+                              _vm.presetCycleLength = $event.target.value
+                            }
+                          }
+                        }),
+                        _vm._v("\n              seconds\n            ")
+                      ])
+                    : _vm._e()
+                ])
+              ])
+            ]),
+            _vm._v(" "),
+            _c("div", { staticClass: "form-group row" }, [
+              _c("div", { staticClass: "col" }, [
+                _c("div", { staticClass: "form-check" }, [
+                  _c("input", {
+                    directives: [
+                      {
+                        name: "model",
+                        rawName: "v-model",
+                        value: _vm.presetRandom,
+                        expression: "presetRandom"
+                      }
+                    ],
+                    staticClass: "form-check-input",
+                    attrs: { type: "checkbox", id: "presetRandom" },
+                    domProps: {
+                      checked: Array.isArray(_vm.presetRandom)
+                        ? _vm._i(_vm.presetRandom, null) > -1
+                        : _vm.presetRandom
+                    },
+                    on: {
+                      change: function($event) {
+                        var $$a = _vm.presetRandom,
+                          $$el = $event.target,
+                          $$c = $$el.checked ? true : false
+                        if (Array.isArray($$a)) {
+                          var $$v = null,
+                            $$i = _vm._i($$a, $$v)
+                          if ($$el.checked) {
+                            $$i < 0 && (_vm.presetRandom = $$a.concat([$$v]))
+                          } else {
+                            $$i > -1 &&
+                              (_vm.presetRandom = $$a
+                                .slice(0, $$i)
+                                .concat($$a.slice($$i + 1)))
+                          }
+                        } else {
+                          _vm.presetRandom = $$c
+                        }
+                      }
+                    }
+                  }),
+                  _vm._v(" "),
+                  _c(
+                    "label",
+                    {
+                      staticClass: "form-check-label",
+                      attrs: { for: "random" }
+                    },
+                    [_vm._v("Random")]
+                  )
+                ])
+              ])
+            ])
+          ])
+        ]
       )
-    ])
-  ])
+    ],
+    1
+  )
 }
 var staticRenderFns = []
 render._withStripped = true

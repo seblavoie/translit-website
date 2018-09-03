@@ -10539,14 +10539,37 @@ form {
   float: right;
 }
 
+.pull-left {
+  float: left;
+}
+
 .wrapper {
   position: relative;
 }
 
+.popover {
+  width: 400px;
+}
+
 .controls {
+  background: rgba(53, 88, 203, 0.5);
   position: absolute;
-  bottom: 12px;
+  bottom: 6px;
   width: 100%;
   border-radius: 0;
+}
+
+.controls a {
+  color: white;
+}
+
+.form-check-label-suffix {
+  position: relative;
+  top: 3px;
+  left: 3px;
+}
+
+form {
+  margin: 0;
 }
 

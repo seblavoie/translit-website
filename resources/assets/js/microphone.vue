@@ -1,6 +1,6 @@
 <template>
   <span>
-    <a href="#" class="nav-link" :class="{'active': usingMicrophone}" @click="requestMicAudio" id="popoverMicrophone"><i class="fas fa-microphone-alt fa-2x"></i>{{ selectedDevice }}</a>
+    <a href="#" class="nav-link" :class="{'active': usingMicrophone}" @click="requestMicAudio" id="popoverMicrophone"><i class="fas fa-microphone-alt fa-2x"></i></a>
 
     <b-popover target="popoverMicrophone" triggers="focus">
        <ul class="nav flex-column nav-pills">
@@ -48,7 +48,6 @@
     methods: {
 
       changeDevice(index) {
-        alert(index)
         this.selectedDevice = index
       },
 
@@ -65,7 +64,6 @@
           $('[data-toggle="popover"]').popover({
             html: true,
             container: "body",
-            // trigger: "hover",
             content: function() {
               var content = $(this).attr("data-popover-content");
               return $(content).html();

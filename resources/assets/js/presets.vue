@@ -1,32 +1,49 @@
 <template>
-  <div>
+  <span>
 
-    <div class="form-group row">
-      <label class="col-md-2 col-form-label" for="preset">Preset: </label>
-      <div class="col-md-4">
-        <select id="presetSelect" name="preset" class="form-control" v-model="presetIndex"  @change="requestPreset">
-          <option v-for="(choice, index) in presetKeys" :value="index">{{ choice }}</option>
-        </select>
-      </div>
-    </div>
+    <a href="#" class="nav-link" :class="{'active': popoverSettingsVisible}" @click="" id="popoverSettings"><i class="fas fa-2x fa-sliders-h"></i></a>
 
-    <div class="form-check form-check-special row">
-      <input class="form-check-input" type="checkbox" id="presetCycle" v-model="presetCycle" @change="restartCycleInterval">
-      <label class="form-check-label" for="cycle" v-model="presetCycle" >Cycle</label>
-      <span  v-if="presetCycle"> for
-        <input class="form-control col-md-2" type="number" id="presetCycleLength"step="1" v-model="presetCycleLength" min="1" @change="restartCycleInterval">
-        seconds
-      </span>
-    </div>
+    <b-popover target="popoverSettings" triggers="focus" placement="topleft">
+      <form action="">
+        <div class="form-group row">
+          <div class="col">
+            <select id="presetSelect" name="preset" class="form-control" v-model="presetIndex"  @change="requestPreset">
+              <option v-for="(choice, index) in presetKeys" :value="index">{{ choice }}</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group row">
+          <div class="col">
+            <div class="form-check form-check-special">
+              <input class="form-check-input" type="checkbox" id="presetCycle" v-model="presetCycle" @change="restartCycleInterval">
+              <label class="form-check-label" for="cycle" v-model="presetCycle" >Cycle</label>
+              <span  v-if="presetCycle"> for
+                <input class="form-control col-md-3 form-control-tight" type="number" id="presetCycleLength"step="1" v-model="presetCycleLength" min="1" @change="restartCycleInterval">
+                seconds
+              </span>
+            </div>
+          </div>
+        </div>
 
-    <div class="form-check row">
-      <input class="form-check-input" type="checkbox" id="presetRandom" v-model="presetRandom">
-      <label class="form-check-label" for="random">Random</label>
-    </div>
-  </div>
-</template>
+        <div class="form-group row">
+          <div class="col">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="presetRandom" v-model="presetRandom">
+              <label class="form-check-label" for="random">Random</label>
+            </div>
+          </div>
+        </div>
+      </form>
+    </b-popover>
 
-<script>
+
+  </span>
+
+   <!--
+   </div> -->
+ </template>
+
+ <script>
   // app.visualizer.audioNode.context.currentTime
   export default {
     name: "presets",
@@ -34,12 +51,13 @@
     data() {
       return {
         cycleInterval: null,
-        presetCycle: false,
+        presetCycle: true,
         presetCycleLength: 15,
         presetRandom: false,
         presets: {},
         presetKeys: [],
-        presetIndex: 0
+        presetIndex: 0,
+        popoverSettingsVisible: false
       }
     },
 
@@ -129,8 +147,8 @@
 
         if(this.presetCycle) {
           this.cycleInterval = setInterval(function() {
-              _this.nextPreset(2.7)
-            }, _this.presetCycleLength * 1000
+            _this.nextPreset(2.7)
+          }, _this.presetCycleLength * 1000
           );
         }
       },
