@@ -11,6 +11,15 @@
         <script type="text/javascript" src="js/dist/butterchurnPresets.min.js"></script>
         <script type="text/javascript" src="js/dist/butterchurnPresetsExtra.min.js"></script>
         <script defer src="js/dist/fontawesome-v520.js"></script>
+        <!-- Global site tag (gtag.js) - Google Analytics -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=UA-11152642-12"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'UA-11152642-12');
+        </script>
 
 
         @empty($prod)
