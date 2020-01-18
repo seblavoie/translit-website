@@ -51,7 +51,7 @@
     data() {
       return {
         cycleInterval: null,
-        presetCycle: true,
+        presetCycle: false,
         presetCycleLength: 15,
         presetRandom: false,
         presets: {},

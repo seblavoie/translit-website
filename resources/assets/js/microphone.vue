@@ -1,18 +1,8 @@
 <template>
   <span>
-    <a href="#" class="nav-link" :class="{'active': usingMicrophone}" @click="requestMicAudio" id="popoverMicrophone"  v-b-tooltip.hover title="Connect microphone">
+    <a href="#" class="nav-link" :class="{'active': usingMicrophone}" @click="requestMicAudio()" id="popoverMicrophone"  v-b-tooltip.hover title="Connect microphone">
       <i class="fas fa-microphone-alt fa-2x"></i>
     </a>
-
-    <b-popover target="popoverMicrophone" triggers="focus">
-      <p v-if="activeDevice.label == ''">Great! We're connected to your default microphone. If you want to choose another microphone, <a href="/">refresh the page</a> and we'll list your options.</p>
-
-       <ul class="nav flex-column nav-pills" v-else>
-         <li class="nav-item" v-for="(device, index) in devices">
-           <a href="#" class="nav-link" :class="{'active': selectedDeviceIndex == index}" @click="changeDevice(index)">{{ device.label }}</a>
-         </li>
-       </ul>
-    </b-popover>
   </span>
 </template>
 
@@ -49,11 +39,6 @@
     ],
 
     methods: {
-
-      changeDevice(index) {
-        this.selectedDeviceIndex = index
-      },
-
       /**
        * Setup devices
        *
@@ -84,10 +69,20 @@
        * @return {}
        */
        requestMicAudio() {
-        var preciseDeviceConstraint = { deviceId: {exact: this.activeDevice.deviceId } }
-        var constraints = (this.activeDevice.label == "" ? {audio: true} : preciseDeviceConstraint)
+        // var preciseDeviceConstraint = { deviceId: {exact: this.activeDevice.deviceId } }
+        // var constraints = (this.activeDevice.label == "" ? {audio: true} : preciseDeviceConstraint)
+
+        if(this.activeDevice.label == "") {
+
+        } else {
+            // should fix here!
+        }
+        this.connectUserMedia()
+      },
+
+      connectUserMedia() {
         navigator.getUserMedia({
-          audio: constraints
+          audio: true
          }, (stream) => {
           var micSourceNode = this.$parent.audioContext.createMediaStreamSource(stream);
           this.connectMicAudio(micSourceNode, this.$parent.audioContext);
@@ -105,6 +100,7 @@
        * @return {[type]}              [description]
        */
        connectMicAudio(sourceNode, audioContext) {
+        console.log("connectMicAudio")
         this.usingMicrophone = true;
         this.$parent.audioContext.resume();
         var gainNode = this.$parent.audioContext.createGain();
