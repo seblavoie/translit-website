@@ -13,7 +13,7 @@
         "axios": "^0.18.1",
         "bootstrap": "^4.4.1",
         "bootstrap-vue": "^2.1.0",
-        "browser-sync": "^2.24.6",
+        "browser-sync": "^2.29.3",
         "browser-sync-webpack-plugin": "2.0.1",
         "butterchurn": "^2.6.7",
         "butterchurn-presets": "^2.4.7",
